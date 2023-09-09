@@ -11,6 +11,9 @@
     @yield('meta')
     <!-- App favicon -->
     <link rel="shortcut icon" href="{{asset('assets/images/favicon.ico')}}">
+    
+    <!-- Sweet Alert-->
+    <link href="{{asset('assets/libs/sweetalert2/sweetalert2.min.css')}}" rel="stylesheet" type="text/css" />
 
     <!-- Bootstrap Css -->
     <link href="{{asset('assets/css/bootstrap.min.css')}}" id="bootstrap-style" rel="stylesheet" type="text/css" />
@@ -76,6 +79,8 @@
     <script src="{{asset('assets/libs/metismenu/metisMenu.min.js')}}"></script>
     <script src="{{asset('assets/libs/simplebar/simplebar.min.js')}}"></script>
     <script src="{{asset('assets/libs/node-waves/waves.min.js')}}"></script>
+    <!-- Sweet Alerts js -->
+    <script src="{{asset('assets/libs/sweetalert2/sweetalert2.min.js')}}"></script>
     @yield('script')
     <script src="{{asset('assets/js/app.js')}}"></script>
     

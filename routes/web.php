@@ -68,7 +68,7 @@ Route::prefix('contributions')->name('contribution.')->group(function (){
         return view('contribution.monthly_table', compact('pageTitle'));
     })->name('monthly');
 
-    Route::get('/generat-monthly', function () {
+    Route::get('/generate-monthly', function () {
         $pageTitle = "Generate monthly contribution";
         return view('contribution.monthly_form', compact('pageTitle'));
     })->name('generate');

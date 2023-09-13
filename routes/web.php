@@ -136,23 +136,33 @@ Route::prefix('payments')->name('payment.')->group(function (){
     })->name('index');
 
     Route::get('/add', function () {
-        $pageTitle = "Add  payment to batch";
-        return view('loan.form', compact('pageTitle'));
+        $batch_id = 0;
+        if (request()->has('batch_id')){
+            $batch_id = request()->get('batch_id');
+        }
+        $pageTitle = "Add payment to batch";
+
+        return view('payment.form', compact('pageTitle', 'batch_id'));
     })->name('add');
 
     Route::get('/batch-list', function () {
         $pageTitle = "Batch List";
-        return view('loan.repayment_table', compact('pageTitle'));
-    })->name('repayment');
+        return view('payment.batch_table', compact('pageTitle'));
+    })->name('batch');
+
+    Route::get('/create-batch', function () {
+        $pageTitle = "Create Batch ";
+        return view('payment.batch_form', compact('pageTitle'));
+    })->name('create-batch');
 
     Route::get('/approve-payment', function () {
         $pageTitle = "Approve payment";
-        return view('loan.approve', compact('pageTitle'));
-    })->name('generate');
+        return view('payment.approve', compact('pageTitle'));
+    })->name('approve');
 
     Route::get('/process-payment', function () {
         $pageTitle = "Process and  Make payment";
-        return view('loan.process', compact('pageTitle'));
+        return view('payment.process', compact('pageTitle'));
     })->name('approve');
 
 });

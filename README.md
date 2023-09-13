@@ -1,5 +1,5 @@
 ## About E-thrift
-E-thrift is a Thrift and Cooperative Society management. It's core functions are stated below:
+E-thrift is a Thrift and Cooperative Society Management System. It's core functions are stated below:
 
 - Member management
 - Contribution managemnet

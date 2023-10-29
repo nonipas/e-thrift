@@ -47,7 +47,7 @@
                                     <tr>
                                         <th>S/N</th>
                                         <th>Batch Name</th>
-                                        <th>Status</th>
+                                        <th>Size</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -58,7 +58,7 @@
                                     <tr>
                                         <td>1</td>
                                         <td>UW_COOP_BATCH_PAYMENT_1</td>
-                                        <td>Active</td>
+                                        <td>1</td>
                                         <td>
                                             {{-- <div class="btn-group">
                                                 <button type="button" class="btn btn-primary dropdown-toggle"
@@ -66,7 +66,7 @@
                                                         class="mdi mdi-chevron-down"></i></button>
                                                 <div class="dropdown-menu"> --}}
                                                     <a class="btn btn-primary waves-effect waves-light w-sm mr-2"
-                                                        href="{{route('payment.add')}}?batch_id={{1}}">Add Payment</a>
+                                                        href="{{route('payment.add')}}?batch_id=1">Add Payment</a>
                                                     <a class="btn btn-danger waves-effect waves-light w-sm" href="#"><i
                                                         class="mdi mdi-delete"></i> Delete</a>
                                                 {{-- </div>

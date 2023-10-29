@@ -3712,7 +3712,7 @@ input[type="checkbox"]:disabled
     border-radius: 50%;
 }
 .auth-full-bg .bg-overlay {
-    background: url(../images/bg-auth-overlay.png);
+    background: url(../images/bg-overlay.jpg);
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;

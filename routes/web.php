@@ -13,6 +13,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/login', function () {
+    $pageTitle = "Login";
+    return view('login', compact('pageTitle'));
+});
+
 Route::get('/', function () {
     $pageTitle = "Dashboard";
     return view('dashboard', compact('pageTitle'));
@@ -155,12 +160,13 @@ Route::prefix('payments')->name('payment.')->group(function (){
         return view('payment.batch_form', compact('pageTitle'));
     })->name('create-batch');
 
-    Route::get('/approve-payment', function () {
+    Route::get('/batch/approve', function () {
+        $id = request()->get('id');
         $pageTitle = "Approve payment";
-        return view('payment.approve', compact('pageTitle'));
+        return view('payment.approve', compact('pageTitle', 'id'));
     })->name('approve');
 
-    Route::get('/process-payment', function () {
+    Route::get('/batch/process', function () {
         $pageTitle = "Process and  Make payment";
         return view('payment.process', compact('pageTitle'));
     })->name('approve');
@@ -179,18 +185,47 @@ Route::prefix('roles')->name('role.')->group(function (){
         return view('role.form', compact('pageTitle'));
     })->name('add');
 
-    Route::get('/permissions', function () {
-        $pageTitle = "Role permissions";
-        return view('role.permission', compact('pageTitle'));
-    })->name('permission');
-
 });
 
 // Setting route
-Route::prefix('sttings')->name('setting.')->group(function (){
+Route::prefix('settings')->name('setting.')->group(function (){
     Route::get('/', function () {
         $pageTitle = "General Settings";
-        return view('setting.form', compact('pageTitle'));
+        return view('settings.form', compact('pageTitle'));
     })->name('index');
 
+    Route::get('/payment/category', function () {
+        $pageTitle = "Payment Category";
+        return view('settings.payment_category', compact('pageTitle'));
+    })->name('payment_category');
+
+    Route::get('/permissions', function () {
+        $pageTitle = "permmisions";
+        return view('settings.permissions', compact('pageTitle'));
+    })->name('permissions');
+
+
 });
+
+//Add user route
+
+Route::post('/user/add', function () {
+    $pageTitle = "Add new User";
+    return view('user.form', compact('pageTitle'));
+})->name('user.store');
+
+
+// User route
+Route::prefix('profile')->name('profile.')->group(function (){
+    Route::get('/', function () {
+        $pageTitle = "User Profile";
+        return view('profile.form', compact('pageTitle'));
+    })->name('index');
+
+    Route::get('/change-password', function () {
+        $pageTitle = "Change Password";
+        return view('profile.change_password', compact('pageTitle'));
+    })->name('change_password');
+
+});
+

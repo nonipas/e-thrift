@@ -48,15 +48,14 @@
                                 <div class="row mb-4">
                                     <label for="horizontal-batch-select" class="col-sm-3 col-form-label">Batch Name</label>
                                     <div class="col-sm-9">
-                                        @if ($batch_id != 0)
-                                            <input type="text" name="batch_name" class="form-control"
-                                                id="horizontal-batch-input" value="UW_COOP_BATCH_PAYMENT_1" readonly>
-                                        @else
-                                            <select name="batch" id="horizontal-batch-select"
-                                                class="form-control select2">
+                                        @if ($batch_id == 0)
+                                            
+                                            <select name="batch" id="horizontal-batch-select" class="form-control select2">
                                                 <option>Select</option>
                                                 <option value="1">UW_COOP_BATCH_PAYMENT_1</option>
                                             </select>
+                                        @else
+                                            <input type="text" name="batch_name" class="form-control" id="horizontal-batch-input" value="UW_COOP_BATCH_PAYMENT_1" readonly>
                                         @endif
                                     </div>
                                 </div>

@@ -24,8 +24,8 @@
                 <div class="col-12">
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                         <h4 class="mb-sm-0 font-size-18">{{ $pageTitle ?? '' }}</h4>
-                        <a href="{{ route('member.add') }}"> <button type="submit" class="btn btn-success mr-2">Add New
-                            Members</button></a>
+                        <a href="{{ route('role.add') }}"> <button type="submit" class="btn btn-success mr-2">Add New
+                            Roles</button></a>
 
 
                     </div>
@@ -47,31 +47,42 @@
                                     <tr>
                                         <th>S/N</th>
                                         <th>Name</th>
+                                        <th>Status</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
 
 
                                 <tbody>
+                                    @foreach ($roles as $role)
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td>{{ $role->name }}</td>
+                                            <td>{{ $role->status == 1 ? 'active' : 'inactive' }}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-primary dropdown-toggle"
+                                                        data-bs-toggle="dropdown" aria-expanded="false">Action <i
+                                                            class="mdi mdi-chevron-down"></i></button>
+                                                    <div class="dropdown-menu">
+                                                        <a class="dropdown-item btn btn-primary waves-effect waves-light w-sm mr-2"
+                                                            href="{{ route('role.edit', $role->id) }}">Edit</a>
 
-                                    <tr>
-                                        <td>1</td>
-                                        <td>Create User</td>
-                                        <td>Active</td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-primary dropdown-toggle"
-                                                    data-bs-toggle="dropdown" aria-expanded="false">Action <i
-                                                        class="mdi mdi-chevron-down"></i></button>
-                                                <div class="dropdown-menu">
-                                                    <a class="dropdown-item btn btn-primary waves-effect waves-light w-sm mr-2"
-                                                        href="#">Edit</a>
-                                                    <a class="dropdown-item" href="#">Delete</a>
-                                                </div>
-                                            </div><!-- /btn-group -->
-                                        </td>
+                                                        <a class="dropdown-item" href="{{ route('role.change_status', $role->id) }}">
+                                                            @if ($role->status == 1)
+                                                                Deactivate
+                                                            @else
+                                                                Activate
+                                                            @endif
+                                                        </a>
 
-                                    </tr>
+                                                        <a class="dropdown-item" href="{{ route('role.delete', $role->id) }}">Delete</a>
+                                                    </div>
+                                                </div><!-- /btn-group -->
+                                            </td>
+
+                                        </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
 

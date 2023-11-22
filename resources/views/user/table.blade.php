@@ -82,6 +82,36 @@
                                         </td>
 
                                     </tr>
+                                    loop through users
+                                    @foreach ($users as $user)
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td>{{ $user->name }}</td>
+                                            <td>{{ $user->username }}</td>
+                                            <td>{{ $user->phone }}</td>
+                                            <td>{{ $user->email }}</td>
+                                            <td>{{ $user->role->name }}</td>
+                                            <td>{{ $user->status }}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-primary dropdown-toggle"
+                                                        data-bs-toggle="dropdown" aria-expanded="false">Action <i
+                                                            class="mdi mdi-chevron-down"></i></button>
+                                                    <div class="dropdown-menu">
+                                                        <a class="dropdown-item btn btn-primary waves-effect waves-light w-sm mr-2"
+                                                            href="{{ route('user.edit', $user->id) }}">Edit</a>
+                                                        <a class="dropdown-item" href="{{ route('user.change_status', $user->id) }}">
+                                                            @if ($user->status == 1)
+                                                                Deactivate
+                                                            @else
+                                                                Activate
+                                                            @endif
+                                                        </a>
+                                                        <a class="dropdown-item" href="{{ route('user.delete', $user->id) }}">Delete</a>
+                                                    </div>
+                                                </div><!-- /btn-group -->
+                                            </td>
+                                        </tr>
                                 </tbody>
                             </table>
 

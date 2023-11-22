@@ -21,9 +21,8 @@
                         <span key="t-dashboards">Users</span>
                     </a>
                     <ul class="sub-menu" aria-expanded="true">
-                        <li><a href="users" key="t-user-list">User List</a></li>
-                        <li><a href="add-users" key="t-add-user">Add Users</a></li>
-                        <li><a href="#" key="t-user-role">Add User Role</a></li>
+                        <li><a href="{{route('user.index')}}" key="t-user-list">User List</a></li>
+                        <li><a href="{{route('user.add')}}" key="t-add-user">Add Users</a></li>
                     </ul>
                 </li>
                 <li>
@@ -32,8 +31,8 @@
                         <span key="t-dashboards">Members</span>
                     </a>
                     <ul class="sub-menu" aria-expanded="true">
-                        <li><a href="#" key="t-default">Members list</a></li>
-                        <li><a href="#" key="t-saas">Add member</a></li>
+                        <li><a href="{{route('member.index')}}" key="t-default">Members list</a></li>
+                        <li><a href="{{route('member.add')}}" key="t-saas">Add member</a></li>
                     </ul>
                 </li>
 
@@ -43,8 +42,8 @@
                         <span key="t-con">Contributions</span>
                     </a>
                     <ul class="sub-menu" aria-expanded="true">
-                        <li><a href="#" key="t-add-cont">Add New Contribution</a></li>
-                        <li><a href="#" key="t-list-cont">Contribution List</a></li>
+                        <li><a href="{{route('contribution.add')}}" key="t-add-cont">Add New Contribution</a></li>
+                        <li><a href="{{route('contribution.index')}}" key="t-list-cont">Contribution List</a></li>
                         <li><a href="#" key="t-gm-cont">Generate Monthly Contribution</a></li>
                         <li><a href="#" key="t-am-cont">Approve Monthly Contribution</a></li>
                         <li><a href="#" key="t-mlist-cont"> Monthly Contribution list</a></li>
@@ -92,22 +91,36 @@
                 </li>
                 <li class="menu-title" key="t-admin">Admin Settings</li>
                 <li>
-                    <a href="#" class="waves-effect">
+                    <a href="{{route('role.index')}}" class="waves-effect">
                         <i class="bx bx-user"></i>
-                        <span key="t-setting">Roles and Permissions
+                        <span key="t-setting">Roles
                         </span>
                     </a>
                 </li>
-
                 <li>
-                    <a href="#" class="waves-effect">
+                    <a href="{{route('setting.permission')}}" class="waves-effect">
+                        <i class="bx bx-user"></i>
+                        <span key="t-setting">Permissions
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{route('setting.payment_category')}}" class="waves-effect">
+                        <i class="bx bx-user"></i>
+                        <span key="t-setting">Payment category
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="{{route('setting.index')}}" class="waves-effect">
                         <i class="bx bx-cog"></i>
                         <span key="t-setting">Settings
                         </span>
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="waves-effect">
+                    <a href="{{route('logout')}}" class="waves-effect">
                         <i class="bx bx-log-out-circle"></i>
                         <span key="t-logout">logout
                         </span>

@@ -40,21 +40,48 @@
                         <div class="card-body">
                             <h4 class="card-title mb-4">{{ $pageTitle ?? '' }}</h4>
 
-                            <form action="insert.php" method="post">
+                            @if(isset($role))
+                                <form action="{{ route('role.update', $role->id) }}" method="post">
+                                    @method('PUT')
+                            @else
+                                <form action="{{ route('role.store') }}" method="post">
+                            @endif
+                                @csrf
                                 <div class="row mb-4">
-                                    <label for="horizontal-account-input" class="col-sm-3 col-form-label">Name</label>
+                                    <label for="horizontal-input" class="col-sm-3 col-form-label">Name</label>
                                     <div class="col-sm-9">
-                                        <input type="text" name="name" class="form-control"
-                                            id="horizontal-account-input" placeholder="Admin">
+                                        <input type="text" name="name" value=" {{$role->name ?? ''}}" class="form-control"
+                                            id="horizontal-input" placeholder="Admin">
                                     </div>
                                 </div>
 
                                 <div class="row mb-4">
                                     <label for="horizontal-pm-input" class="col-sm-3 col-form-label">Permissions</label>
                                     <div class="col-sm-9">
-                                        <label for="permission">
-                                            <input type="checkbox" id="permission" class="form-control" name="permission[]" class="" value="create_user"> Create User
-                                        </label>
+
+                                        @foreach($permissions as $permission)
+
+                                            {{-- check if rolePermissions is set --}}
+                                            @php
+                                                $rolePermissions = isset($role_permissions) ? $role_permissions : [];
+                                            @endphp
+
+                                            {{-- check if the permission is already assigned to the role --}}
+                                            
+                                            @if(in_array($permission->slug, $rolePermissions))
+                                                <div class="form-check form-switch mb-3">
+                                                
+                                                    <input class="form-check-input" type="checkbox" id="permission{{$permission->id}}" value="{{$permission->slug}}" name="permissions[]" checked>
+                                                    <label class="form-check-label" for="permission{{$permission->id}}">{{$permission->name}}</label>
+                                                </div>
+                                            @else
+                                                <div class="form-check form-switch mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="permission{{$permission->id}}" value="{{$permission->slug}}" name="permissions[]" >
+                                                    <label class="form-check-label" for="permission{{$permission->id}}">{{$permission->name}}</label>
+                                                </div>
+                                            @endif
+
+                                        @endforeach
                                     </div>
                                 </div>
 
@@ -62,7 +89,7 @@
                                     <div class="col-sm-9">
 
                                         <div>
-                                            <button type="submit" name="add-admin"
+                                            <button type="submit" name="submit"
                                                 class="btn btn-primary w-md">Submit</button>
                                         </div>
                                     </div>

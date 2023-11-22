@@ -14,7 +14,8 @@
     
     <!-- Sweet Alert-->
     <link href="{{asset('assets/libs/sweetalert2/sweetalert2.min.css')}}" rel="stylesheet" type="text/css" />
-
+    @notifyCss
+    <!-- third party css -->
     <!-- Bootstrap Css -->
     <link href="{{asset('assets/css/bootstrap.min.css')}}" id="bootstrap-style" rel="stylesheet" type="text/css" />
     <!-- Icons Css -->
@@ -23,10 +24,13 @@
     <link href="{{asset('assets/css/app.min.css')}}" id="app-style" rel="stylesheet" type="text/css" />
     @yield('link')
 
+    
+
 </head>
 
 <body data-sidebar="dark">
 
+    
     <!-- Begin page -->
     <div id="layout-wrapper">
 
@@ -73,17 +77,28 @@
         {{-- main section end --}}
 
     </div>
+    @include('notify::components.notify')
     {{-- END layout-wrapper --}}
     <script src="{{asset('assets/libs/jquery/jquery.min.js')}}"></script>
     <script src="{{asset('assets/libs/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
     <script src="{{asset('assets/libs/metismenu/metisMenu.min.js')}}"></script>
     <script src="{{asset('assets/libs/simplebar/simplebar.min.js')}}"></script>
-    <script src="{{asset('assets/libs/node-waves/waves.min.js')}}"></script>
+    <script src="{{asset('assets/libs/node-waves/waves.min.js')}}"></script>  
+  
     <!-- Sweet Alerts js -->
     <script src="{{asset('assets/libs/sweetalert2/sweetalert2.min.js')}}"></script>
+    <!-- Bootstrap Toasts Js -->
+    {{-- <script src="{{asset('assets/js/pages/bootstrap-toastr.init.js')}}"></script> --}}
+    @notifyJs
     @yield('script')
     <script src="{{asset('assets/js/app.js')}}"></script>
-    
+    @if(isset($message))
+        {{App\Helpers\Helpers::getToastr($message)}}
+    @endif
+
+    @if(session('message'))
+        {{App\Helpers\Helpers::getToastr(session ('message'))}}
+    @endif
 </body>
 
 </html>

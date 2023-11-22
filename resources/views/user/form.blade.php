@@ -24,8 +24,8 @@
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                         <h4 class="mb-sm-0 font-size-18">{{ $pageTitle ?? '' }}</h4>
 
-                        <a href="{{ route('member.index') }}"> <button type="submit" class="btn btn-success mr-2">View
-                                Members List</button></a>
+                        <a href="{{ route('user.index') }}"> <button type="submit" class="btn btn-success mr-2">View
+                                Users List</button></a>
 
 
                     </div>
@@ -40,20 +40,25 @@
                         <div class="card-body">
                             <h4 class="card-title mb-4">{{ $pageTitle ?? '' }}</h4>
 
-                            <form action="insert.php" method="post">
+                            @if(isset($user))
+                                <form action="{{ route('user.update', $user->id) }}" method="post">
+                            @else
+                                <form action="{{ route('user.store') }}" method="post">
+                            @endif
+                                    @csrf
                                 
                                 <div class="row mb-4">
                                     <label for="horizontal-name-input" class="col-sm-3 col-form-label">Full name</label>
                                     <div class="col-sm-9">
                                         <input type="text" name="name" class="form-control" id="horizontal-name-input"
-                                            placeholder="Uche John">
+                                            placeholder="Uche John" value="{{$user->name ?? ''}}" >
                                     </div>
                                 </div>
                                 <div class="row mb-4">
                                     <label for="horizontal-phone-input" class="col-sm-3 col-form-label">Phone no:</label>
                                     <div class="col-sm-9">
                                         <input type="text" name="phone" class="form-control"
-                                            id="horizontal-phone-input" placeholder="08012345678">
+                                            id="horizontal-phone-input" placeholder="08012345678" value="{{$user->phone ?? ''}}">
                                     </div>
                                 </div>
 
@@ -61,7 +66,7 @@
                                     <label for="horizontal-email-input" class="col-sm-3 col-form-label">Email</label>
                                     <div class="col-sm-9">
                                         <input type="email" name="email" class="form-control"
-                                            id="horizontal-email-input" placeholder="name@email.com">
+                                            id="horizontal-email-input" placeholder="name@email.com" value="{{$user->email ?? ''}}">
                                     </div>
                                 </div>
 
@@ -77,6 +82,13 @@
                                             <option value="5">Admin/Manager</option>
                                             <option value="6">Super Admin</option>
                                             <option value="7">Report viewer</option>
+                                            @foreach ($roles as $role)
+                                                @if(isset($user))
+                                                    <option value="{{ $role->id }}" @if($user->role_id == $role->id) selected @endif>{{ $role->name }}</option>
+                                                @else
+                                                <option value="{{ $role->id }}">{{ $role->name }}</option>
+                                                @endif
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>
@@ -87,7 +99,7 @@
                                     <div class="col-sm-9">
 
                                         <div>
-                                            <button type="submit" name="add-admin"
+                                            <button type="submit" name="submit"
                                                 class="btn btn-primary w-md">Submit</button>
                                         </div>
                                     </div>

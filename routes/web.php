@@ -1,6 +1,38 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\BankController;
+use App\Http\Controllers\PaymentCategoryController;
+use App\Http\Controllers\PaymentBatchController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ContributionController;
+use App\Http\Controllers\DividendController;
+use App\Http\Controllers\LoanController;
+use App\Http\Controllers\MemberController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SettingController;
+use App\Http\Controllers\UserController;
+use App\Models\PaymentBatch;
+use App\Models\Payment;
+use App\Models\Permission;
+use App\Models\Role;
+use App\Models\Bank;
+use App\Models\Contribution;
+use App\Models\Activity;
+use App\Models\MonthlyContribution;
+use App\Models\MonthlyRepayment;
+use App\Models\MonthlyContributionDetail;
+use App\Models\MonthlyRepaymentDetail;
+use App\Models\AnnualDividend;
+use App\Models\AnnualDividendDetail;
+use App\Models\PaymentCategory;
+use App\Models\Loan;
+use App\Models\Member;
+use App\Models\Setting;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,12 +48,30 @@ use Illuminate\Support\Facades\Route;
 Route::get('/login', function () {
     $pageTitle = "Login";
     return view('login', compact('pageTitle'));
-});
+})->name('login');
+
+//auth routes
+Route::post('/login', [App\Http\Controllers\AuthController::class, 'login'])->name('login_submit');
+Route::get('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
+Route::get('/forgot-password', function () {
+    $pageTitle = "Forgot Password";
+    return view('forgot_password', compact('pageTitle'));
+})->name('forgot-password');
+
+//send reset password link
+Route::post('/send-reset-password-link', [App\Http\Controllers\AuthController::class, 'sendResetPasswordLink'])->name('send-reset-password-link');
+
+//reset password
+Route::get('/reset-password/{code}', [App\Http\Controllers\AuthController::class, 'resetPassword'])->name('reset-password');
+Route::post('/reset-password', [App\Http\Controllers\AuthController::class, 'storeResetPassword'])->name('store-reset-password');
+
+//vrify email
+Route::get('/verify/{code}', [App\Http\Controllers\AuthController::class, 'verifyEmail'])->name('verify-email');
 
 Route::get('/', function () {
     $pageTitle = "Dashboard";
     return view('dashboard', compact('pageTitle'));
-});
+})->name('dashboard');
 
 // Admin user route
 Route::prefix('users')->name('user.')->group(function (){
@@ -177,13 +227,35 @@ Route::prefix('payments')->name('payment.')->group(function (){
 Route::prefix('roles')->name('role.')->group(function (){
     Route::get('/', function () {
         $pageTitle = "Roles and  Permission";
-        return view('role.table', compact('pageTitle'));
+        $roles = Role::all();
+        return view('role.table', compact('pageTitle', 'roles'));
     })->name('index');
 
     Route::get('/add', function () {
         $pageTitle = "Add New Role";
-        return view('role.form', compact('pageTitle'));
+        $permissions = Permission::all();
+        return view('role.form', compact('pageTitle', 'permissions'));
     })->name('add');
+
+    Route::get('/edit/{id}', function ($id) {
+        $pageTitle = "Edit Role";
+        $role = Role::find($id);
+        $permissions = Permission::all();
+        //check if role has permission
+        $role_permissions = [];
+        if ($role->permissions){
+            $role_permissions = explode(',', $role->permissions);
+        }
+
+        return view('role.form', compact('pageTitle', 'role', 'permissions', 'role_permissions'));
+    })->name('edit');
+
+    // store role
+    Route::post('/store', [RoleController::class, 'store'])->name('store');
+    Route::post('/update/{id}', [RoleController::class, 'update'])->name('update');
+    Route::get('/delete/{id}', [RoleController::class, 'delete'])->name('delete');
+    Route::get('/change-status/{id}', [RoleController::class, 'changeStatus'])->name('change_status');
+
 
 });
 
@@ -191,41 +263,95 @@ Route::prefix('roles')->name('role.')->group(function (){
 Route::prefix('settings')->name('setting.')->group(function (){
     Route::get('/', function () {
         $pageTitle = "General Settings";
-        return view('settings.form', compact('pageTitle'));
+        $settings = Setting::all();
+        //key value pair
+        $settings_array = [];
+        foreach ($settings as $setting){
+            $settings_array[$setting->key] = $setting->value;
+        }
+        return view('settings.form', compact('pageTitle', 'settings_array'));
     })->name('index');
 
     Route::get('/payment/category', function () {
         $pageTitle = "Payment Category";
-        return view('settings.payment_category', compact('pageTitle'));
+        $payment_categories = PaymentCategory::all();
+        $payment_category = null;
+        if (request()->has('id')){
+            $id = request()->get('id');
+            $payment_category = PaymentCategory::find($id);
+        }
+        return view('settings.payment_category', compact('pageTitle', 'payment_categories', 'payment_category'));
     })->name('payment_category');
 
     Route::get('/permissions', function () {
-        $pageTitle = "permmisions";
-        return view('settings.permissions', compact('pageTitle'));
-    })->name('permissions');
+        $pageTitle = "Manage Permmisions";
+        $permissions = Permission::all();
+        $permission = null;
+        if (request()->has('id')){
+            $id = request()->get('id');
+            $permission = Permission::find($id);
+        }
+        return view('settings.permissions', compact('pageTitle', 'permissions', 'permission'));
+    })->name('permission');
 
+    Route::post('/update', [SettingController::class, 'update'])->name('update');
+    Route::post('/payment/category/store', [SettingController::class, 'storePaymentCategory'])->name('payment_category_store');
+    Route::post('/payment/category/update/{id}', [SettingController::class, 'updatePaymentCategory'])->name('payment_category_update');
+    Route::get('/payment/category/delete/{id}', [SettingController::class, 'deletePaymentCategory'])->name('payment_category_delete');
+    Route::post('/permission/store', [SettingController::class, 'storePermission'])->name('permission_store');
+    Route::post('/permission/update/{id}', [SettingController::class, 'updatePermission'])->name('permission_update');
+    Route::get('/permission/delete/{id}', [SettingController::class, 'deletePermission'])->name('permission_delete');
+    Route::get('/permission/change-status/{id}', [SettingController::class, 'changePermissionStatus'])->name('permission_change_status');
 
 });
 
-//Add user route
-
-Route::post('/user/add', function () {
-    $pageTitle = "Add new User";
-    return view('user.form', compact('pageTitle'));
-})->name('user.store');
-
-
 // User route
-Route::prefix('profile')->name('profile.')->group(function (){
-    Route::get('/', function () {
-        $pageTitle = "User Profile";
-        return view('profile.form', compact('pageTitle'));
-    })->name('index');
+Route::prefix('user')->group(function (){
 
-    Route::get('/change-password', function () {
-        $pageTitle = "Change Password";
-        return view('profile.change_password', compact('pageTitle'));
-    })->name('change_password');
+    //user management route
+    Route::name('user.')->group(function(){
+
+        Route::get('/', [UserController::class, 'index'])->name('index');
+
+        Route::get('/add', function () {
+            $pageTitle = "Add new User";
+            $roles = Role::all();
+            return view('user.form', compact('pageTitle', 'roles'));
+        })->name('add');
+    
+        Route::get('/edit/{id}', function ($id) {
+            $pageTitle = "Edit User";
+            $user = User::find($id);
+            $roles = Role::all();
+            return view('user.form', compact('pageTitle', 'user', 'roles'));
+        })->name('edit');
+
+        Route::post('/store', [UserController::class, 'store'])->name('store');
+        Route::post('/update/{id}', [UserController::class, 'update'])->name('update');
+        Route::get('/delete/{id}', [UserController::class, 'delete'])->name('delete');
+        Route::get('/change-status/{id}', [UserController::class, 'changeStatus'])->name('change_status');
+        Route::get('/reset-password/{id}', [UserController::class, 'resetPassword'])->name('reset_password');
+
+    });
+    
+
+    //user profile route
+    Route::name('profile.')->group(function (){
+        Route::get('/profile', function () {
+            $pageTitle = "User Profile";
+            $user = Auth::user();
+            return view('user.profile', compact('pageTitle', 'user'));
+        })->name('index');
+
+        Route::get('/change-password', function () {
+            $pageTitle = "Change Password";
+            return view('user.change_password', compact('pageTitle'));
+        })->name('change_password');
+
+        Route::post('/update-profile', [UserController::class, 'updateProfile'])->name('update');
+        Route::post('/update-password', [UserController::class, 'updatePassword'])->name('update_password');
+
+    });
 
 });
 

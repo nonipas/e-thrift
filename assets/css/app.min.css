@@ -3711,7 +3711,7 @@ input[type="checkbox"]:disabled
     height: 300px;
     border-radius: 50%;
 }
-.auth-full-bg .bg-overlay {
+.auth-full-bg {
     background: url(../images/bg-overlay.jpg);
     background-size: cover;
     background-repeat: no-repeat;
@@ -4603,5 +4603,9 @@ input[type="checkbox"]:disabled
     -webkit-transform: translateY(-50%);
     transform: translateY(-50%);
     margin: 0 auto;
+}
+.z-index-1000 {
+    position: relative;
+    z-index: 9999;
 }
 /*# sourceMappingURL=app.min.css.map */

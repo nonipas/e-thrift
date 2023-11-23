@@ -24,10 +24,8 @@
                 <div class="col-12">
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                         <h4 class="mb-sm-0 font-size-18">{{ $pageTitle ?? '' }}</h4>
-                        <a href="{{ route('member.add') }}"> <button type="submit" class="btn btn-success mr-2">Add New
+                        <a href="{{ route('member.add') }}"> <button type="submit" class="btn btn-primary mr-2">Add New
                             Members</button></a>
-
-
                     </div>
                 </div>
             </div>
@@ -40,7 +38,12 @@
 
                             <h4 class="card-title">{{ $pageTitle ?? '' }}</h4>
 
-                            </p>
+                            <div class="mb-2">
+                                {{-- active members link  --}}
+                                <a href="{{ route('member.index') }}?status=active"> <button type="submit" class="btn btn-success mr-2"> View Active Members</button></a>
+                                {{-- inactive members link --}}
+                                <a href="{{ route('member.index') }}?status=inactive"> <button type="submit" class="btn btn-danger mr-2">View Inactive Members</button></a>
+                            </div>
 
                             <table id="datatable-buttons" class="table table-bordered dt-responsive  nowrap w-100">
                                 <thead>
@@ -59,14 +62,15 @@
 
                                 <tbody>
 
+                                    @foreach ($members as $member)
                                     <tr>
-                                        <td>1</td>
-                                        <td>Nonso Pascal</td>
-                                        <td>0035774856</td>
-                                        <td>Union</td>
-                                        <td>Ikwo</td>
-                                        <td>08050825393</td>
-                                        <td>Active</td>
+                                        <td>{{$loop->iteration}}</td>
+                                        <td>{{$member->name}}</td>
+                                        <td>{{$member->account_number}}</td>
+                                        <td>{{\App\Helpers\Helpers::getBankName($member->bank)}}</td>
+                                        <td>{{$member->department}}</td>
+                                        <td>{{$member->phone}}</td>
+                                        <td>{{$member->status == 1 ? 'active' : 'inactive'}}</td>
                                         <td>
                                             <div class="btn-group">
                                                 <button type="button" class="btn btn-primary dropdown-toggle"
@@ -74,13 +78,20 @@
                                                         class="mdi mdi-chevron-down"></i></button>
                                                 <div class="dropdown-menu">
                                                     <a class="dropdown-item btn btn-primary waves-effect waves-light w-sm mr-2"
-                                                        href="#">Edit</a>
-                                                    <a class="dropdown-item" href="#">Deactivate</a>
+                                                        href="{{ route('member.edit', $member->id) }}">Edit</a>
+                                                    <a class="dropdown-item" href="{{ route('member.change_status', $member->id) }}">
+                                                        @if ($member->status == 1)
+                                                            Deactivate
+                                                        @else
+                                                            Activate
+                                                        @endif
+                                                    </a>
                                                 </div>
                                             </div><!-- /btn-group -->
                                         </td>
-
                                     </tr>
+                                    @endforeach
+
                                 </tbody>
                             </table>
 

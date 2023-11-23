@@ -33,6 +33,7 @@ use App\Models\Member;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\Helpers;
 
 /*
 |--------------------------------------------------------------------------
@@ -65,7 +66,7 @@ Route::post('/send-reset-password-link', [App\Http\Controllers\AuthController::c
 Route::get('/reset-password/{code}', [App\Http\Controllers\AuthController::class, 'resetPassword'])->name('reset-password');
 Route::post('/reset-password', [App\Http\Controllers\AuthController::class, 'storeResetPassword'])->name('store-reset-password');
 
-//vrify email
+//verify email
 Route::get('/verify/{code}', [App\Http\Controllers\AuthController::class, 'verifyEmail'])->name('verify-email');
 
 Route::get('/', function () {
@@ -73,36 +74,46 @@ Route::get('/', function () {
     return view('dashboard', compact('pageTitle'));
 })->name('dashboard');
 
-// Admin user route
-Route::prefix('users')->name('user.')->group(function (){
-    Route::get('/', function () {
-        $pageTitle = "All Admin Users";
-        return view('user.table', compact('pageTitle'));
-    })->name('index');
-
-    Route::get('/add', function () {
-        $pageTitle = "Add new User";
-        $route = route('user.store');
-        return view('user.form', compact('pageTitle'));
-    })->name('add');
-
-    Route::get('/give-permission', function () {
-        $pageTitle = "Admin Users Role and Permission";
-        return view('user.role_form', compact('pageTitle'));
-    })->name('give_permission');
-});
+//get account name route
+Route::post('/get-account-name', [App\Http\Controllers\GeneralController::class, 'getAccountName'])->name('get-account-name');
 
 // Members route
 Route::prefix('members')->name('member.')->group(function (){
     Route::get('/', function () {
         $pageTitle = "All Members";
-        return view('member.table', compact('pageTitle'));
+        $members = Member::all();
+        if (request()->has('status')){
+            $status = request()->get('status');
+            if ($status == 'active'){
+                $status = 1;
+            }elseif ($status == 'inactive'){
+                $status = 0;
+            }
+            $members = Member::where('status', $status)->get();
+        }
+        Helpers::getBanks();
+        Helpers::storeActivity("Viewed member list");
+        return view('member.table', compact('pageTitle', 'members'));
     })->name('index');
 
     Route::get('/add', function () {
         $pageTitle = "Add new member";
-        return view('member.form', compact('pageTitle'));
+        $banks = Bank::all();
+        Helpers::storeActivity("Viewed add member form");
+        return view('member.form', compact('pageTitle', 'banks'));
     })->name('add');
+
+    Route::get('/edit/{id}', function ($id) {
+        $pageTitle = "Edit member";
+        $member = Member::find($id);
+        $banks = Bank::all();
+        Helpers::storeActivity("Viewed edit member form");
+        return view('member.form', compact('pageTitle', 'member', 'banks'));
+    })->name('edit');
+
+    Route::post('/store', [MemberController::class, 'store'])->name('store');
+    Route::post('/update/{id}', [MemberController::class, 'update'])->name('update');
+    Route::get('/change-status/{id}', [MemberController::class, 'updateStatus'])->name('change_status');
 
 });
 

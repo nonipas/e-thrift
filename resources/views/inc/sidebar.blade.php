@@ -9,7 +9,7 @@
                 <li class="menu-title" key="t-menu">Menu</li>
 
                 <li class="mm-active">
-                    <a href="dashboard" class="waves-effect">
+                    <a href="{{url('/')}}" class="waves-effect">
                         <i class="bx bx-home-circle"></i>
                         <span key="t-dashboards">Dashboards</span>
                     </a>

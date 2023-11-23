@@ -82,7 +82,6 @@
                                         </td>
 
                                     </tr>
-                                    loop through users
                                     @foreach ($users as $user)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
@@ -112,6 +111,7 @@
                                                 </div><!-- /btn-group -->
                                             </td>
                                         </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
 

@@ -40,60 +40,73 @@
                         <div class="card-body">
                             <h4 class="card-title mb-4">{{ $pageTitle ?? '' }}</h4>
 
-                            <form action="insert.php" method="post">
+                            @if(isset($member))
+                            <form action="{{ route('member.update', $member->id) }}" method="post">
+                            @else
+                            <form action="{{ route('member.store') }}" method="post">
+                            @endif
+                                @csrf
                                 <div class="row mb-4">
-                                    <label for="horizontal-account-input" class="col-sm-3 col-form-label">Account No</label>
-                                    <div class="col-sm-9">
-                                        <input type="text" name="account_no" class="form-control"
-                                            id="horizontal-account-input" placeholder="0123456789 ">
+                                    <label for="account-no" class="col-sm-4 col-form-label">Account No</label>
+                                    <div class="col-sm-8">
+                                        <input type="text" name="account_number" class="form-control"
+                                            id="account-no" placeholder="0123456789" value="{{$member->account_number ?? ''}}" >
                                     </div>
                                 </div>
                                 <div class="row mb-4">
-                                    <label for="horizontal-bank-select" class="col-sm-3 col-form-label">Bank</label>
-                                    <div class="col-sm-9">
-                                        <select name="bank" id="horizontal-bank-select" class="form-control select2">
+                                    <label for="horizontal-bank-select" class="col-sm-4 col-form-label">Bank</label>
+                                    <div class="col-sm-8">
+                                        <select name="bank" id="horizontal-bank-select" class="form-control select2" onchange="getAccountName()">
                                             <option>Select</option>
+                                            @foreach ($banks as $bank)
+                                                <option value="{{ $bank->code }}" {{ isset($member) && $member->bank == $bank->code ? 'selected' : '' }}>{{ $bank->name }}</option> 
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>
                                 <div class="row mb-4">
-                                    <label for="horizontal-name-input" class="col-sm-3 col-form-label">Name</label>
-                                    <div class="col-sm-9">
-                                        <input type="text" name="name" class="form-control" id="horizontal-name-input"
-                                            placeholder="Uche John">
+                                    <label for="account-name" class="col-sm-4 col-form-label">Name</label>
+                                    <div class="col-sm-8">
+                                        <input type="text" name="name" class="form-control" id="account-name"
+                                            placeholder="Uche John" value="{{$member->name ?? ''}}" readonly>
                                     </div>
                                 </div>
                                 <div class="row mb-4">
-                                    <label for="horizontal-phone-input" class="col-sm-3 col-form-label">Phone no:</label>
-                                    <div class="col-sm-9">
+                                    <label for="horizontal-phone-input" class="col-sm-4 col-form-label">Phone no:</label>
+                                    <div class="col-sm-8">
                                         <input type="text" name="phone" class="form-control"
-                                            id="horizontal-phone-input" placeholder="08012345678">
+                                            id="horizontal-phone-input" placeholder="08012345678" value="{{$member->phone ?? ''}}">
                                     </div>
                                 </div>
 
                                 <div class="row mb-4">
-                                    <label for="horizontal-dept-select" class="col-sm-3 col-form-label">Department</label>
-                                    <div class="col-sm-9">
+                                    <label for="horizontal-dept-select" class="col-sm-4 col-form-label">Department</label>
+                                    <div class="col-sm-8">
                                         <select name="depatment" id="horizontal-dept-select" class="form-control select2">
+                                            @php $departments = \App\Models\Department::where('status',1)->get() ?? []; @endphp
                                             <option>Select</option>
+
+                                            @foreach ($departments as $department)
+                                                <option value="{{ $department->id }}" {{ isset($member) && $member->department_id == $department->id ? 'selected' : '' }}>{{ $department->name }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>
 
                                 <div class="row mb-4">
-                                    <label for="horizontal-amount-input" class="col-sm-3 col-form-label">Monthly
-                                        Contribution</label>
-                                    <div class="col-sm-9">
-                                        <input type="text" name="contribution_amount" class="form-control"
-                                            id="horizontal-amount-input" placeholder="1000">
+                                    <label for="employee-id" class="col-sm-4 col-form-label">Employee
+                                        ID <span class="small">(if available)</span></label>
+                                    <div class="col-sm-8">
+                                        <input type="text" name="employment_id" class="form-control"
+                                            id="employee-id" placeholder="1000" value=""{{$member->employment_id ?? ''}}>
                                     </div>
                                 </div>
 
                                 <div class="row justify-content-end">
-                                    <div class="col-sm-9">
+                                    <div class="col-sm-8">
 
                                         <div>
-                                            <button type="submit" name="add-admin"
+                                            <button type="submit" name="submit"
                                                 class="btn btn-primary w-md">Submit</button>
                                         </div>
                                     </div>
@@ -128,6 +141,33 @@
     <!-- form advanced init -->
     {{-- <script src="{{asset('assets/js/pages/form-advanced.init.js')}}"></script> --}}
     <script>
+        function getAccountName() {
+            var bank = $('#horizontal-bank-select').val();
+            var account_number = $('#account-no').val();
+            if (bank != '' && account_number != '') {
+                $.ajax({
+                    url: "{{ route('get-account-name') }}",
+                    type: "POST",
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        "bank": bank,
+                        "account_number": account_number
+                    },
+                    success: function(response) {
+                        if (response.status == true) {
+                            $('#account-name').attr('readonly', 'readonly');
+                            $('#account-name').val(response.account_name);
+                        } else {
+                            $('#account-name').val('');
+                            $('#account-name').removeAttr('readonly');
+                        }
+                    },
+                    error: function(response) {
+                        console.log(response);
+                    }
+                });
+            }
+        }
         !(function(s) {
             "use strict";
 

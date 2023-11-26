@@ -24,7 +24,7 @@
                 <div class="col-12">
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                         <h4 class="mb-sm-0 font-size-18">{{ $pageTitle ?? '' }}</h4>
-                        <a href="{{ route('contribution.add') }}"> <button type="submit" class="btn btn-success mr-2">Add New
+                        <a href="{{ route('contribution.add') }}"> <button type="submit" class="btn btn-primary mr-2">Add New
                             Contribution</button></a>
 
 
@@ -39,8 +39,13 @@
                         <div class="card-body">
 
                             <h4 class="card-title">{{ $pageTitle ?? '' }}</h4>
-
-                            </p>
+                            <div class="mb-2">
+                                
+                                <a href="{{ route('contribution.index') }}?status=active"> <button type="submit" class="btn btn-success mr-2">View Active
+                                    Contributions</button></a>
+                                <a href="{{ route('contribution.index') }}?status=inactive"> <button type="submit" class="btn btn-danger mr-2">View Inactive
+                                    Contributions</button></a>
+                            </div>
 
                             <table id="datatable-buttons" class="table table-bordered dt-responsive  nowrap w-100">
                                 <thead>
@@ -56,27 +61,42 @@
 
 
                                 <tbody>
+                                    @foreach ($contributions as $contribution)
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td>{{ $contribution->member->name }}</td>
+                                            <td>{{ number_format($contribution->amount) }}</td>
+                                            
+                                            <td>
+                                                @php
+                                                $no_of_months = \App\Models\MonthlyContributionDetail::where('member_id', $contribution->member_id)->where('is_approved', 1)->count();
+                                                
+                                                if($no_of_months > 0){
+                                                    echo $no_of_months;
+                                                } else {
+                                                    echo '0';
+                                                }
+                                                @endphp
+                                            </td>
+                                            <td>{{ number_format($contribution->balance,2) }}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-primary dropdown-toggle"
+                                                        data-bs-toggle="dropdown" aria-expanded="false">Action <i
+                                                            class="mdi mdi-chevron-down"></i></button>
+                                                    <div class="dropdown-menu">
+                                                        <a class="dropdown-item btn btn-primary waves-effect waves-light w-sm mr-2"
+                                                            href="{{route('contribution.edit',['id'=>$contribution->id])}}">Edit</a>
+                                                        <a class="dropdown-item" href="{{route('contribution.delete',['id'=>$contribution->id])}}">Delete</a>
+                                                        
 
-                                    <tr>
-                                        <td>1</td>
-                                        <td>Nonso Pascal</td>
-                                        <td>10000</td>
-                                        <td>5</td>
-                                        <td>50000</td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-primary dropdown-toggle"
-                                                    data-bs-toggle="dropdown" aria-expanded="false">Action <i
-                                                        class="mdi mdi-chevron-down"></i></button>
-                                                <div class="dropdown-menu">
-                                                    <a class="dropdown-item btn btn-primary waves-effect waves-light w-sm mr-2"
-                                                        href="#">Edit</a>
-                                                    <a class="dropdown-item" href="#">Delete</a>
-                                                </div>
-                                            </div><!-- /btn-group -->
-                                        </td>
+                                                    </div>
+                                                </div><!-- /btn-group -->
+                                            </td>
 
-                                    </tr>
+                                        </tr>
+                                    @endforeach
+
                                 </tbody>
                             </table>
 

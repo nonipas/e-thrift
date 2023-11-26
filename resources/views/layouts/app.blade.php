@@ -23,9 +23,21 @@
     <!-- App Css-->
     <link href="{{asset('assets/css/app.min.css')}}" id="app-style" rel="stylesheet" type="text/css" />
     @yield('link')
+    <style>
 
+        #preloader {
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 999;
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            background: rgba(255, 255, 255, .8) url("{{ asset('assets/images/loader.gif') }}") no-repeat center center;
+        }
     
-
+    </style>
+    
 </head>
 
 <body data-sidebar="dark">
@@ -71,7 +83,11 @@
                 </div>
             </footer>
             {{-- footer section end --}}
-            
+            <div id="preloader" >
+                <div class="spinner-border color-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
         </main>
 
         {{-- main section end --}}

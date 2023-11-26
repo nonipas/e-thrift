@@ -18,6 +18,7 @@
 @endsection
 
 @section('content')
+
     <div class="page-content">
         <div class="container-fluid">
 
@@ -41,14 +42,16 @@
                     <div class="card">
                         <div class="card-body">
 
-                            <form action="insert.php" method="post">
+                            <form action="" method="post" id="approve-form">
 
                                 <div class="row mb-4">
                                     <label for="horizontal-month-select" class="col-sm-3 col-form-label">Month</label>
                                     <div class="col-sm-9">
                                         <select name="month" id="horizontal-month-select" class="form-control select">
                                             <option value="">Select month</option>
-                                            <option value="September">September</option>
+                                            @foreach ($months as $month)
+                                                <option value="{{ $month->name }}">{{ $month->name }}</option>
+                                            @endforeach
                                         </select>
 
                                     </div>
@@ -67,9 +70,10 @@
 
                                         <div class="">
                                             <button type="submit" name="generate"
-                                                class="btn btn-primary w-md">Search</button>
-                                            <button type="button" name="approve" class="btn btn-success w-md"
-                                                id="sa-warning">Approve</button>
+                                                class="btn btn-primary w-md" id="search">Search</button>
+                                            
+                                            <button type="button" name="approve" class="btn btn-success w-md {{isset($list) ? 'd-none':''}}"
+                                                id="approve">Approve</button>
                                         </div>
                                     </div>
                                 </div>
@@ -88,11 +92,10 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-
-                            <h4 class="card-title">{{ $pageTitle ?? '' }}</h4>
-
-                            </p>
-
+                            <div class="monthly">
+                           
+                            </div>
+                            <h4 class=" mt-3 card-title">{{ $pageTitle ?? '' }} details</h4>
                             <table id="datatable-buttons" class="table table-bordered dt-responsive  nowrap w-100">
                                 <thead>
                                     <tr>
@@ -101,35 +104,51 @@
                                         <th>Amount</th>
                                         <th>Month</th>
                                         <th>Year</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
+                                        <th>Status</th> 
+                                        @if(isset($list))
+                                        <th>Approved By</th>
+                                        <th>Date Approved</th>
+                                        @endif
+                                        <th class="{{isset($list) ? 'd-none':''}}">Action</th>
                                     </tr>
                                 </thead>
 
 
-                                <tbody>
+                                <tbody id="t-body">
 
-                                    <tr>
-                                        <td>1</td>
-                                        <td>Nonso Pascal</td>
-                                        <td>{{ number_format('10000', 2) }}</td>
-                                        <td>September</td>
-                                        <td>2023</td>
-                                        <td>Approved</td>
-                                        <td>
-                                            <div class="btn-group">
+                                    @if (count($monthly_contribution_details) > 0)
+                                    @foreach ($monthly_contribution_details as $monthly_contribution_detail)
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td>{{ $monthly_contribution_detail->member->name }}</td>
+                                            <td>{{ number_format($monthly_contribution_detail->amount) }}</td>
+                                            <td>{{ $monthly_contribution_detail->month }}</td>
+                                            <td>{{ $monthly_contribution_detail->year }}</td>
+                                            <td>{{ !$monthly_contribution_detail->is_approved ? 'Unapproved':'Approved' }}</td>
+                                            @if(isset($list))
+                                            <td>{{ \App\Models\User::where('id',$monthly_contribution_detail->approved_by)->first()->name ?? 'Admin' }}</td>
+                                            <td>{{ date('Y-m-d H:i:s',strtotime($monthly_contribution_detail->approved_at)) }}</td>
+                                            @endif
+                                            <td class="{{isset($list) ? 'd-none':''}}">
+                                                <div class="btn-group">
                                                 <button type="button" class="btn btn-primary dropdown-toggle"
                                                     data-bs-toggle="dropdown" aria-expanded="false">Action <i
                                                         class="mdi mdi-chevron-down"></i></button>
                                                 <div class="dropdown-menu">
-                                                    {{-- <a class="dropdown-item btn btn-primary waves-effect waves-light w-sm mr-2"
-                                                        href="#">Edit</a> --}}
-                                                    <a class="dropdown-item" href="#">Delete</a>
+                                                    @if (!$monthly_contribution_detail->is_approved)
+                                                        <a class="dropdown-item"
+                                                            href="{{ route('contribution.approve_monthly_member', $monthly_contribution_detail->id) }}">Approve</a>
+                                                            @else
+                                                        <a class="dropdown-item"
+                                                            href="{{ route('contribution.delete_monthly_detail', $monthly_contribution_detail->id) }}">Reject</a>
+                                                    @endif
                                                 </div>
                                             </div><!-- /btn-group -->
-                                        </td>
-
-                                    </tr>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                    @endif
+                                    
                                 </tbody>
                             </table>
 
@@ -165,32 +184,102 @@
     <!-- Datatable init js -->
     <script src="{{ asset('assets/js/pages/datatables.init.js') }}"></script>
 
-    <script>
-        ! function(t) {
-            "use strict";
+    <script> 
+  
+    //function to get all generated monthly contribution when search button is clicked
+    $(document).ready(function() {
+        $("#search").click(function(e) {
+            e.preventDefault();
+            //activate a loader for t-body table to show that data is loading
+            $("#t-body").html('<tr><td colspan="7" class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
+            var month = $("#horizontal-month-select").val();
+            var yr = $("#horizontal-year-input").val();
+            //delay the ajax request for 3 second to allow the loader to show
+            setTimeout(function() {
+                $.ajax({
+                    url: "{{ route('contribution.search_monthly') }}",
+                    type: "GET",
+                    data: {
+                        month: month,
+                        year: yr,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        //hide class monthly
+                        $(".monthly").hide();
+                        $("#t-body").html(response.data);
+                    },
+                });
+            }, 3000);
+        });
+    });
 
-            function e() {}
-            e.prototype.init = function() {
-                t("#sa-warning").click(function() {
-                    var month = t("#horizontal-month-select").val();
-                    var yr = t("#horizontal-year-input").val();
-                    Swal.fire({
-                        title: "Are you sure?",
-                        text: "You won't be able to revert this!",
-                        icon: "warning",
-                        showCancelButton: !0,
-                        confirmButtonColor: "#34c38f",
-                        cancelButtonColor: "#f46a6a",
-                        confirmButtonText: "Yes, Approve!"
-                    }).then(function(t) {
-                        t.value && Swal.fire("Approved!", "Contributions for <strong>"+month+", "+yr+"</strong> approved successfully.", "success")
-                    })
-                })
-            }, t.SweetAlert = new e, t.SweetAlert.Constructor = e
-        }(window.jQuery),
-        function() {
-            "use strict";
-            window.jQuery.SweetAlert.init()
-        }();
+    //function to approve all generated monthly contribution when approve button is clicked
+    $(document).ready(function() {
+        $("#approve").click(function(e) {
+            e.preventDefault();
+            //activate the preloader
+            $("#preloader").css("display", "block");
+
+            var month = $("#horizontal-month-select").val();
+            var yr = $("#horizontal-year-input").val();
+            //use sweet alet to confirm if user wants to approve
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to approve all generated monthly contribution for the selected month and year",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#556ee6',
+                cancelButtonColor: '#f46a6a',
+                confirmButtonText: 'Yes, approve it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    //delay the ajax request for 3 second to allow the loader to show
+                    setTimeout(function() {
+                        $.ajax({
+                            url: "{{ route('contribution.approve_monthly') }}",
+                            type: "POST",
+                            data: {
+                                month: month,
+                                year: yr,
+                                _token: "{{ csrf_token() }}"
+                            },
+                            success: function(response) {
+                                //check if response is success
+                                if (response.status == 'success') {
+                                    Swal.fire(
+                                        'Approved!',
+                                        'All generated monthly contribution for the selected month and year has been approved.',
+                                        'success'
+                                    )
+                                }else{
+                                    Swal.fire(
+                                        'Error!',
+                                        response.message,
+                                        'error'
+                                    )
+                                }
+                                //hide the preloader
+                                $("#preloader").css("display", "none");
+                                //activate a loader for t-body table to show that data is loading and delay for 3 seconds
+                                $("#t-body").html('<tr><td colspan="7" class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
+                                setTimeout(function() {
+                                    
+                                    $("#t-body").html(response.data);
+
+                                }, 3000);
+                            },
+                        });
+                    }, 3000);
+                }
+                $("#preloader").css("display", "none");
+            })
+        });
+    }); 
+    
+    </script>
+
+    <script>
+       
     </script>
 @endsection

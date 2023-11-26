@@ -44,9 +44,9 @@
                     <ul class="sub-menu" aria-expanded="true">
                         <li><a href="{{route('contribution.add')}}" key="t-add-cont">Add New Contribution</a></li>
                         <li><a href="{{route('contribution.index')}}" key="t-list-cont">Contribution List</a></li>
-                        <li><a href="#" key="t-gm-cont">Generate Monthly Contribution</a></li>
-                        <li><a href="#" key="t-am-cont">Approve Monthly Contribution</a></li>
-                        <li><a href="#" key="t-mlist-cont"> Monthly Contribution list</a></li>
+                        <li><a href="{{route('contribution.generate')}}" key="t-gm-cont">Generate Monthly Contribution</a></li>
+                        <li><a href="{{route('contribution.approve')}}" key="t-am-cont">Approve Monthly Contribution</a></li>
+                        <li><a href="{{route('contribution.monthly_list')}}" key="t-mlist-cont"> Monthly Contribution list</a></li>
                     </ul>
                 </li>
 

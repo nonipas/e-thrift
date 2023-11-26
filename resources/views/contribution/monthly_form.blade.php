@@ -44,7 +44,8 @@
                         <div class="card-body">
                             <h4 class="card-title mb-4">{{ $pageTitle ?? '' }}</h4>
 
-                            <form action="insert.php" method="post">
+                            <form action="{{route('contribution.generate_monthly')}}" method="post">
+                                @csrf
 
                                 <div class="row mb-4">
                                     <label for="horizontal-month-select" class="col-sm-3 col-form-label">Month</label>
@@ -52,6 +53,9 @@
                                             <select name="month" id="horizontal-month-select"
                                                 class="form-control select">
                                                 <option value="">Select month</option>
+                                                @foreach ($months as $month)
+                                                    <option value="{{ $month->name }}">{{ $month->name }}</option>
+                                                @endforeach
                                             </select>
                                         
                                     </div>

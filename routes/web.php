@@ -76,6 +76,9 @@ Route::get('/', function () {
 
 //get account name route
 Route::post('/get-account-name', [App\Http\Controllers\GeneralController::class, 'getAccountName'])->name('get-account-name');
+Route::get('/search-member', [App\Http\Controllers\GeneralController::class, 'getMembers'])->name('search-member');
+//save months of the year to database
+Route::get('/save-months', [App\Http\Controllers\GeneralController::class, 'saveMonths'])->name('save-months');
 
 // Members route
 Route::prefix('members')->name('member.')->group(function (){
@@ -121,28 +124,78 @@ Route::prefix('members')->name('member.')->group(function (){
 Route::prefix('contributions')->name('contribution.')->group(function (){
     Route::get('/', function () {
         $pageTitle = "List of Contributions";
-        return view('contribution.table', compact('pageTitle'));
+        $contributions = Contribution::all();
+        if (request()->has('status')){
+            $status = request()->get('status');
+            if ($status == 'active'){
+                $status = 1;
+            }elseif ($status == 'inactive'){
+                $status = 0;
+            }
+            $contributions = Contribution::where('status', $status)->get();
+        }
+        return view('contribution.table', compact('pageTitle', 'contributions'));
     })->name('index');
 
     Route::get('/add', function () {
         $pageTitle = "Add new contribution";
-        return view('contribution.form', compact('pageTitle'));
+        $members = Member::all();
+        return view('contribution.form', compact('pageTitle', 'members'));
     })->name('add');
 
-    Route::get('/monthly', function () {
+    Route::get('/edit/{id}', function ($id) {
+        $pageTitle = "Edit contribution";
+        $contribution = Contribution::find($id);
+        $members = Member::all();
+        return view('contribution.form', compact('pageTitle', 'contribution', 'members'));
+    })->name('edit');
+
+    Route::get('/approve-monthly/{id}', function ($id) {
         $pageTitle = "Monthly contributions";
-        return view('contribution.monthly_table', compact('pageTitle'));
+        $monthly_contributions = MonthlyContribution::find($id);
+        $pageTitle = "Approve monthly contribution for " . $monthly_contributions->month . " " . $monthly_contributions->year;
+        // $monthly_contribution_details = [];
+        
+        $monthly_contribution_details = MonthlyContributionDetail::where('monthly_contribution_id', $id)->get();
+        
+        $months = \App\Models\Month::all();
+        return view('contribution.monthly_table', compact('pageTitle', 'monthly_contributions', 'months', 'monthly_contribution_details'));
     })->name('monthly');
+
+    Route::get('/monthly/list', function () {
+        $pageTitle = "Monthly contribution list";
+        $monthly_contribution_details = MonthlyContributionDetail::all();
+        $months = \App\Models\Month::all();
+        $list = true;
+        return view('contribution.monthly_table', compact('pageTitle', 'monthly_contribution_details', 'months', 'list'));
+    })->name('monthly_list');
 
     Route::get('/generate-monthly', function () {
         $pageTitle = "Generate monthly contribution";
-        return view('contribution.monthly_form', compact('pageTitle'));
+        $months = \App\Models\Month::all();
+        return view('contribution.monthly_form', compact('pageTitle', 'months'));
     })->name('generate');
 
     Route::get('/approve-monthly', function () {
         $pageTitle = "Approve monthly contribution";
-        return view('contribution.approve', compact('pageTitle'));
+        $monthly_contributions = MonthlyContribution::where('is_approved', 0)->get();
+        return view('contribution.approve', compact('pageTitle', 'monthly_contributions'));
     })->name('approve');
+
+    Route::post('/store', [ContributionController::class, 'store'])->name('store');
+    Route::post('/update/{id}', [ContributionController::class, 'update'])->name('update');
+    Route::delete('/delete/{id}', [ContributionController::class, 'delete'])->name('delete');
+    Route::get('/change-status/{id}', [ContributionController::class, 'updateStatus'])->name('change_status');
+    Route::post('/generate-monthly', [ContributionController::class, 'generateMonthlyContribution'])->name('generate_monthly');
+    Route::post('/approve-monthly', [ContributionController::class, 'approveMonthlyContribution'])->name('approve_monthly');
+    Route::get('/approve-monthly/{id}', [ContributionController::class, 'approveMonthlyContributionById'])->name('approve_monthly_id');
+    Route::get('/search-monthly', [ContributionController::class, 'searchMonthlyContribution'])->name('search_monthly');
+
+    Route::post('/approve-monthly-member/{id}', [ContributionController::class, 'approveMonthlyContributionForMember'])->name('approve_monthly_member');
+    Route::delete('/delete-monthly/{id}', [ContributionController::class, 'deleteMonthlyContribution'])->name('delete_monthly');
+
+    Route::delete('/delete-monthly-detail/{id}', [ContributionController::class, 'deleteMonthlyContributionDetail'])->name('delete_monthly_detail');
+
 
 });
 

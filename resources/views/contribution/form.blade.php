@@ -78,6 +78,15 @@
                                 </div>
 
                                 <div class="row mb-4">
+                                    <label for="prev-months" class="col-sm-3 col-form-label">No of Months Previously Contributed</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" name="previous_months" class="form-control"
+                                            id="prev-months" placeholder="5" value="{{$contribution->previous_months_no ?? 0}}">
+                                    </div>
+
+                                </div>
+
+                                <div class="row mb-4">
                                     <label for="horizontal-amount-input" class="col-sm-3 col-form-label">Amount</label>
                                     <div class="col-sm-9">
                                         <input type="text" name="amount" class="form-control"

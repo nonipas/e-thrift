@@ -34,44 +34,6 @@
             </div>
             <!-- end page title -->
 
-            {{-- form starts --}}
-            <div class="row">
-
-                <div class="col-xl-8" style="">
-                    <div class="card">
-                        <div class="card-body">
-
-                            <form action="insert.php" method="post">
-
-                                <div class="row mb-4">
-                                    <label for="horizontal-year-input" class="col-sm-3 col-form-label">Year</label>
-                                    <div class="col-sm-9">
-                                        <input type="text" name="year" class="form-control" id="horizontal-year-input"
-                                            placeholder="2023">
-                                    </div>
-                                </div>
-
-                                <div class="row justify-content-end">
-                                    <div class="col-sm-9">
-
-                                        <div class="">
-                                            <button type="submit" name="generate"
-                                                class="btn btn-primary w-md">Search</button>
-                                            <button type="button" name="approve" class="btn btn-success w-md"
-                                                id="sa-warning">Approve</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <!-- end card body -->
-                    </div>
-                    <!-- end card -->
-                </div>
-                <!-- end col -->
-            </div>
-            {{-- form ends --}}
-
             {{-- table starts --}}
             <div class="row">
                 <div class="col-12">
@@ -86,41 +48,38 @@
                                 <thead>
                                     <tr>
                                         <th>S/N</th>
-                                        <th>Member</th>
-                                        <th>Amount</th>
-                                        <th>Share {{__('%')}}</th>
-                                        <th>Total Contributions</th>
                                         <th>Year</th>
+                                        <th>Total Members</th>
+                                        <th>Total Amount Shared</th>
+                                        <th>Dividend Total</th>
                                         <th>Status</th>
-                                        <th>Action</th>
+                                        <th >Action</th>
                                     </tr>
                                 </thead>
 
 
                                 <tbody>
-
+                                    @foreach($dividends as $dividend)
+                                    @php
+                                        $total_members = AnnualDividendDetail::where('annual_dividend_id', $dividend->id)->groupBy('member_id')->get()->count();
+                                    @endphp
                                     <tr>
-                                        <td>1</td>
-                                        <td>Nonso Pascal</td>
-                                        <td>{{ number_format('10000', 2) }}</td>
-                                        <td>1</td>
-                                        <td>{{ number_format('100000', 2) }}</td>
-                                        <td>2023</td>
-                                        <td>Approved</td>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $dividend->year }}</td>
+                                        <td>{{ $total_members }}</td>
+                                        <td>{{ number_format($dividend->total_amount,2) }}</td>
+                                        <td>{{ number_format($dividend->total_dividend,2) }}</td>
+                                        <td>{{ !$dividend->is_approved ? 'Unapproved':'Approved' }}</td>
                                         <td>
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-primary dropdown-toggle"
-                                                    data-bs-toggle="dropdown" aria-expanded="false">Action <i
-                                                        class="mdi mdi-chevron-down"></i></button>
-                                                <div class="dropdown-menu">
-                                                    {{-- <a class="dropdown-item btn btn-primary waves-effect waves-light w-sm mr-2"
-                                                        href="#">Edit</a> --}}
-                                                    <a class="dropdown-item" href="#">Delete</a>
-                                                </div>
-                                            </div><!-- /btn-group -->
-                                        </td>
-
+                                            @if (!$dividend->is_approved)
+                                                <button class="btn btn-success btn-sm" onclick="approveDividend({{$dividend->id}})">Approve</button>
+                                                <button class="btn btn-danger btn-sm" onclick="rejectDividend({{$dividend->id}})">Reject</button>
+                                            @else
+                                                <button class="btn btn-danger btn-sm" onclick="rejectDividend({{$dividend->id}})">Reject</button>
+                                            @endif
+                                            <a class="btn btn-primary btn-sm" href="{{ route('dividend.detail',['id'=>$dividend->id]) }}">View Details</a>
                                     </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
 
@@ -157,31 +116,84 @@
     <script src="{{ asset('assets/js/pages/datatables.init.js') }}"></script>
 
     <script>
-        ! function(t) {
-            "use strict";
+        function approveDividend(id){
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to approve this dividend?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#34c38f',
+                cancelButtonColor: '#f46a6a',
+                confirmButtonText: 'Yes, Approve!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('dividend.approve_id', '') }}",
+                        type: "POST",
+                        data: {
+                            "_token": "{{ csrf_token() }}",
+                            "id": id
+                        },
+                        success: function(response) {
+                            if (response.status) {
+                                Swal.fire(
+                                    'Approved!',
+                                    'Dividend approved successfully.',
+                                    'success'
+                                ).then((result) => {
+                                    location.reload();
+                                })
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    'Something went wrong.',
+                                    'error'
+                                )
+                            }
+                        }
+                    });
+                }
+            })
+        }
 
-            function e() {}
-            e.prototype.init = function() {
-                t("#sa-warning").click(function() {
-                    var month = t("#horizontal-month-select").val();
-                    var yr = t("#horizontal-year-input").val();
-                    Swal.fire({
-                        title: "Are you sure?",
-                        text: "You won't be able to revert this!",
-                        icon: "warning",
-                        showCancelButton: !0,
-                        confirmButtonColor: "#34c38f",
-                        cancelButtonColor: "#f46a6a",
-                        confirmButtonText: "Yes, Approve!"
-                    }).then(function(t) {
-                        t.value && Swal.fire("Approved!", "Dividends for <strong>"+yr+"</strong> approved successfully.", "success")
-                    })
-                })
-            }, t.SweetAlert = new e, t.SweetAlert.Constructor = e
-        }(window.jQuery),
-        function() {
-            "use strict";
-            window.jQuery.SweetAlert.init()
-        }();
+        function rejectDividend(id){
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to reject this dividend?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#34c38f',
+                cancelButtonColor: '#f46a6a',
+                confirmButtonText: 'Yes, Reject!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('dividend.delete', '') }}",
+                        type: "POST",
+                        data: {
+                            "_token": "{{ csrf_token() }}",
+                            "id": id
+                        },
+                        success: function(response) {
+                            if (response.status) {
+                                Swal.fire(
+                                    'Rejected!',
+                                    'Dividend rejected successfully.',
+                                    'success'
+                                ).then((result) => {
+                                    location.reload();
+                                })
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    'Something went wrong.',
+                                    'error'
+                                )
+                            }
+                        }
+                    });
+                }
+            })
+        }
     </script>
 @endsection

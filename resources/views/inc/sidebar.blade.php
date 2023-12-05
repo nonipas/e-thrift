@@ -56,9 +56,10 @@
                         <span key="t-dividend">Dividend</span>
                     </a>
                     <ul class="sub-menu" aria-expanded="true">
-                        <li><a href="#" key="t-gen-dividend">Generate Annual Dividend</a></li>
+                        <li><a href="{{route('dividend.generate')}}" key="t-gen-dividend">Generate Annual Dividend</a></li>
 
-                        <li><a href="#" key="t-gen-divend">Search Dividend List</a></li>
+                        <li><a href="{{route('dividend.index')}}" key="t-gen-divend">Dividend List</a></li>
+                        <li><a href="{{route('dividend.approve')}}" key="t-gen-divend">Approve Dividend</a></li>
                     </ul>
                 </li>
 

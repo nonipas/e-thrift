@@ -151,7 +151,6 @@ Route::prefix('contributions')->name('contribution.')->group(function (){
     })->name('edit');
 
     Route::get('/approve-monthly/{id}', function ($id) {
-        $pageTitle = "Monthly contributions";
         $monthly_contributions = MonthlyContribution::find($id);
         $pageTitle = "Approve monthly contribution for " . $monthly_contributions->month . " " . $monthly_contributions->year;
         // $monthly_contribution_details = [];
@@ -166,9 +165,29 @@ Route::prefix('contributions')->name('contribution.')->group(function (){
         $pageTitle = "Monthly contribution list";
         $monthly_contribution_details = MonthlyContributionDetail::all();
         $months = \App\Models\Month::all();
+        $data = array(
+            'year' => '',
+            'month' => '',
+        );
         $list = true;
-        return view('contribution.monthly_table', compact('pageTitle', 'monthly_contribution_details', 'months', 'list'));
+        
+        return view('contribution.monthly_table', compact('pageTitle', 'monthly_contribution_details', 'months', 'list', 'data'));
     })->name('monthly_list');
+
+    Route::get('/monthly/approve/detail/{id}', function ($id) {
+        $months = \App\Models\Month::all();
+        
+        $monthly_contribution = MonthlyContribution::find($id);
+        $pageTitle = "Approve monthly contribution for " . $monthly_contribution->month . " " . $monthly_contribution->year;
+        $data = array(
+            'year' => $monthly_contribution->year,
+            'month' => $monthly_contribution->month,
+        );
+
+        $monthly_contribution_details = MonthlyContributionDetail::where('monthly_contribution_id', $id)->get();
+        $list = false;
+        return view('contribution.monthly_table', compact('pageTitle', 'monthly_contribution_details', 'months', 'list', 'data'));
+    })->name('monthly_detail');
 
     Route::get('/generate-monthly', function () {
         $pageTitle = "Generate monthly contribution";
@@ -203,7 +222,10 @@ Route::prefix('contributions')->name('contribution.')->group(function (){
 Route::prefix('dividend')->name('dividend.')->group(function (){
     Route::get('/', function () {
         $pageTitle = "Dividend list";
-        return view('dividend.table', compact('pageTitle'));
+        //get all dividends
+        $dividends = AnnualDividend::all();
+        
+        return view('dividend.table', compact('pageTitle', 'dividends'));
     })->name('index');
 
     Route::get('/generate', function () {
@@ -213,8 +235,42 @@ Route::prefix('dividend')->name('dividend.')->group(function (){
 
     Route::get('/approve', function () {
         $pageTitle = "Approve dividend";
-        return view('dividend.approve', compact('pageTitle'));
+        $dividends = AnnualDividend::where('is_approved', 0)->get();
+        return view('dividend.table', compact('pageTitle', 'dividends'));
     })->name('approve');
+
+    //view dividend details
+    Route::get('view/details/{id}', function ($id) {
+        
+        $dividend = AnnualDividend::find($id);
+        $dividend_details = AnnualDividendDetail::where('annual_dividend_id', $id)->get();
+        $pageTitle = "Dividend details for " . $dividend->year;
+        $isListForApproval = false;
+        if ($dividend->is_approved == 0){
+            $isListForApproval = true;
+        }
+        return view('dividend.details_table', compact('pageTitle', 'dividend', 'dividend_details', 'isListForApproval'));
+    })->name('details');
+
+    //view all dividend details
+    Route::get('view/details', function () {
+        
+        $dividend_details = AnnualDividendDetail::all();
+        // limit to only 500 records
+        $dividend_details = $dividend_details->take(500);
+        $pageTitle = "Dividend details";
+        $isListForApproval = false;
+        return view('dividend.details_table', compact('pageTitle', 'dividend_details', 'isListForApproval'));
+    })->name('all_details');
+
+    //store generated dividend
+    Route::post('/store', [DividendController::class, 'store'])->name('store');
+    Route::post('/approve', [DividendController::class, 'approve'])->name('approve');
+    Route::get('/approve/{id}', [DividendController::class, 'approveById'])->name('approve_id');
+    Route::get('/approve/detail/{id}', [DividendController::class, 'approveDetail'])->name('approve_detail');
+    Route::get('/delete/detail/{id}', [DividendController::class, 'deleteDetail'])->name('delete_detail');
+    Route::get('/search', [DividendController::class, 'search'])->name('search');
+    Route::post('/delete/{id}', [DividendController::class, 'delete'])->name('delete');
 
 });
 

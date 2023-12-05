@@ -27,8 +27,13 @@
                 <div class="col-12">
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                         <h4 class="mb-sm-0 font-size-18">{{ $pageTitle ?? '' }}</h4>
+                        @if($list)
                         <a href="{{ route('contribution.generate') }}"> <button type="submit"
                                 class="btn btn-success mr-2">Generate Monthly Contribution</button></a>
+                        @else
+                        <a href="{{ route('contribution.approve_monthly') }}"> <button type="submit" 
+                                class="btn btn-success mr-2">View Monthly Approval List</button></a>
+                        @endif
 
                     </div>
                 </div>
@@ -47,12 +52,15 @@
                                 <div class="row mb-4">
                                     <label for="horizontal-month-select" class="col-sm-3 col-form-label">Month</label>
                                     <div class="col-sm-9">
-                                        <select name="month" id="horizontal-month-select" class="form-control select">
+                                        <select name="month" id="horizontal-month-select" class="form-control select" {{$list ? '':'disabled'}}>
                                             <option value="">Select month</option>
                                             @foreach ($months as $month)
-                                                <option value="{{ $month->name }}">{{ $month->name }}</option>
+                                                <option value="{{ $month->name }}" {{$month->name == $data['month'] ? 'selected':''}}>{{ $month->name }}</option>
                                             @endforeach
                                         </select>
+                                        @if (!$list)
+                                            <input type="hidden" name="month" value="{{$data['month']}}">
+                                        @endif
 
                                     </div>
                                 </div>
@@ -61,7 +69,7 @@
                                     <label for="horizontal-year-input" class="col-sm-3 col-form-label">Year</label>
                                     <div class="col-sm-9">
                                         <input type="text" name="year" class="form-control" id="horizontal-year-input"
-                                            placeholder="2023">
+                                            placeholder="2023" value="{{$data['year']}}" {{$list ? '':'readonly'}}>
                                     </div>
                                 </div>
 
@@ -70,10 +78,10 @@
 
                                         <div class="">
                                             <button type="submit" name="generate"
-                                                class="btn btn-primary w-md" id="search">Search</button>
+                                                class="btn btn-primary w-md {{$list ? '':'d-none'}}" id="search" >Search</button>
                                             
-                                            <button type="button" name="approve" class="btn btn-success w-md {{isset($list) ? 'd-none':''}}"
-                                                id="approve">Approve</button>
+                                            <button type="button" name="approve" class="btn btn-success w-md {{$list ? 'd-none':''}}"
+                                                id="approve">Approve All</button>
                                         </div>
                                     </div>
                                 </div>
@@ -105,11 +113,11 @@
                                         <th>Month</th>
                                         <th>Year</th>
                                         <th>Status</th> 
-                                        @if(isset($list))
+                                        @if($list)
                                         <th>Approved By</th>
                                         <th>Date Approved</th>
                                         @endif
-                                        <th class="{{isset($list) ? 'd-none':''}}">Action</th>
+                                        <th class="{{$list ? 'd-none':''}}">Action</th>
                                     </tr>
                                 </thead>
 
@@ -125,25 +133,18 @@
                                             <td>{{ $monthly_contribution_detail->month }}</td>
                                             <td>{{ $monthly_contribution_detail->year }}</td>
                                             <td>{{ !$monthly_contribution_detail->is_approved ? 'Unapproved':'Approved' }}</td>
-                                            @if(isset($list))
-                                            <td>{{ \App\Models\User::where('id',$monthly_contribution_detail->approved_by)->first()->name ?? 'Admin' }}</td>
-                                            <td>{{ date('Y-m-d H:i:s',strtotime($monthly_contribution_detail->approved_at)) }}</td>
+                                            @if($list)
+                                            <td>{{ \App\Models\User::where('id',$monthly_contribution_detail->approved_by)->first()->name ?? '' }}</td>
+                                            <td>{{ $monthly_contribution_detail->approved_at ? date('Y-m-d H:i:s',strtotime($monthly_contribution_detail->approved_at)) : '' }}</td>
                                             @endif
-                                            <td class="{{isset($list) ? 'd-none':''}}">
-                                                <div class="btn-group">
-                                                <button type="button" class="btn btn-primary dropdown-toggle"
-                                                    data-bs-toggle="dropdown" aria-expanded="false">Action <i
-                                                        class="mdi mdi-chevron-down"></i></button>
-                                                <div class="dropdown-menu">
+                                            <td class="{{$list ? 'd-none':''}}">
                                                     @if (!$monthly_contribution_detail->is_approved)
-                                                        <a class="dropdown-item"
+                                                        <a class="btn btn-success btn-sm"
                                                             href="{{ route('contribution.approve_monthly_member', $monthly_contribution_detail->id) }}">Approve</a>
                                                             @else
-                                                        <a class="dropdown-item"
+                                                        <a class="btn btn-danger btn-sm"
                                                             href="{{ route('contribution.delete_monthly_detail', $monthly_contribution_detail->id) }}">Reject</a>
                                                     @endif
-                                                </div>
-                                            </div><!-- /btn-group -->
                                             </td>
                                         </tr>
                                     @endforeach
@@ -266,6 +267,8 @@
                                 setTimeout(function() {
                                     
                                     $("#t-body").html(response.data);
+                                    //set html document title
+                                    document.title = 'Monthly Contribution List For '+month+' '+yr;
 
                                 }, 3000);
                             },

@@ -44,7 +44,7 @@
                         <div class="card-body">
                             <h4 class="card-title mb-4">{{ $pageTitle ?? '' }}</h4>
 
-                            <form action="insert.php" method="post">
+                            <form action="{{route('dividend.store')}}" method="post">
 
                                 <div class="row mb-4">
                                     <label for="horizontal-year-input" class="col-sm-3 col-form-label">Year</label>
@@ -54,7 +54,7 @@
                                     </div>
                                 </div>
                                 <div class="row mb-4">
-                                    <label for="horizontal-amount-input" class="col-sm-3 col-form-label">Amount</label>
+                                    <label for="horizontal-amount-input" class="col-sm-3 col-form-label">Amount <span class="small">(Total amount to be shared)</span></label>
                                     <div class="col-sm-9">
                                         <input type="text" name="amount" class="form-control"
                                             id="horizontal-amount-input" placeholder="1000000">

@@ -27,7 +27,7 @@
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                         <h4 class="mb-sm-0 font-size-18">{{ $pageTitle ?? '' }}</h4>
 
-                        <a href="{{ route('contribution.monthly') }}"> <button type="submit"
+                        <a href="{{ route('contribution.monthly_list') }}"> <button type="submit"
                                 class="btn btn-success mr-2">View
                                 Monthly Contribution List</button></a>
 

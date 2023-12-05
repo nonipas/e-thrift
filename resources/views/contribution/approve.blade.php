@@ -59,7 +59,7 @@
                                     @foreach ($monthly_contributions as $monthly_contribution)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
-                                            <td> <a href="{{ route('contribution.monthly').'?id='. $monthly_contribution->id }}">{{$monthly_contribution->month}}</a> </td>
+                                            <td> <a href="{{ route('contribution.monthly_detail',['id'=>$monthly_contribution->id]) }}">{{$monthly_contribution->month}}</a> </td>
                                             <td>{{ $monthly_contribution->year }}</td>
                                             <td>{{ number_format($monthly_contribution->total_amount) }}</td>
                                             <td> 
@@ -77,11 +77,11 @@
                                             <td>
                                                 
                                                     @if (!$monthly_contribution->is_approved)
-                                                        <button class="btn btn-success btn-sm" onclick="confirmApproval({{ route('contribution.approve_monthly_id', $monthly_contribution->id) }})">Approve</button>
+                                                        <button class="btn btn-success btn-sm" onclick="approveMonthlyContribution({{$monthly_contribution->id}})">Approve</button>
                                                     @else
-                                                        <button class="btn btn-danger btn-sm" onclick="confirmRejection({{ route('contribution.delete_monthly', $monthly_contribution->id) }})">Reject</button>
+                                                        <button class="btn btn-danger btn-sm" onclick="rejectMonthlyContribution({{$monthly_contribution->id}})">Reject</button>
                                                     @endif
-                                                    <a class="btn btn-primary btn-sm" href="{{ route('contribution.monthly', $monthly_contribution->id) }}">View Details</a>
+                                                    <a class="btn btn-primary btn-sm" href="{{ route('contribution.monthly_detail',['id'=>$monthly_contribution->id]) }}">View Details</a>
                                                 
                                             </td>
                                         </tr>
@@ -125,14 +125,12 @@
 
     <script> 
   
-    //function to get all generated monthly contribution when search button is clicked
-    $(document).ready(function() {
        function loadUrl(url){
         //open the url
         window.location.href = url;
        }
 
-       function confirmApproval(url){
+       function approveMonthlyContribution(id){
         Swal.fire({
             title: 'Are you sure?',
             text: "You want to approve this monthly contribution",
@@ -143,12 +141,13 @@
             confirmButtonText: 'Yes, approve it!'
         }).then((result) => {
             if (result.isConfirmed) {
+                var url = "{{ route('contribution.approve_monthly_id','') }}"+"/"+id;
                 loadUrl(url);
             }
         })
        }
 
-       function confirmRejection(url){
+       function rejectMonthlyContribution(id){
         Swal.fire({
             title: 'Are you sure?',
             text: "You want to reject this monthly contribution",
@@ -159,11 +158,11 @@
             confirmButtonText: 'Yes, reject it!'
         }).then((result) => {
             if (result.isConfirmed) {
+                var url = "{{ route('contribution.delete_monthly', '') }}"+"/"+id;
                 loadUrl(url);
             }
         })
        }
-    });
     
     </script>
 

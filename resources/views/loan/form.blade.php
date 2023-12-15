@@ -27,8 +27,7 @@
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                         <h4 class="mb-sm-0 font-size-18">{{ $pageTitle ?? '' }}</h4>
 
-                        <a href="{{ route('loan.index') }}"> <button type="submit"
-                                class="btn btn-success mr-2">View
+                        <a href="{{ route('loan.index') }}"> <button type="submit" class="btn btn-success mr-2">View
                                 Loan List</button></a>
 
                     </div>
@@ -43,87 +42,123 @@
                         <div class="card-body">
                             <h4 class="card-title mb-4">{{ $pageTitle ?? '' }}</h4>
 
-                            <form action="insert.php" method="post">
+                            @if (isset($loan))
+                                <form action="{{ route('loan.update', $loan->id) }}" method="POST">
+                                @else
+                                    <form action="{{ route('loan.store') }}" method="POST">
+                            @endif
+                            @csrf
 
-                                <div class="row mb-4">
-                                    <label for="horizontal-member-select" class="col-sm-3 col-form-label">Member</label>
-                                    <div class="col-sm-9">
-                                        <div class="mb-3 ajax-select mt-3 mt-lg-0">
-                                            <select name="member" id="horizontal-member-select"
-                                                class="form-control select2-ajax">
+                            <div class="row mb-4">
+                                <label for="horizontal-member-select" class="col-sm-3 col-form-label">Member</label>
+                                <div class="col-sm-9">
+                                    <div class="mb-3 ajax-select mt-3 mt-lg-0">
+                                        <select name="member" id="horizontal-member-select" onchange="getMemberDetail()"
+                                            class="form-control select2-ajax" {{ isset($loan) ? 'readonly' : '' }} >
 
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row mb-4">
-                                    <label for="horizontal-account-input" class="col-sm-3 col-form-label">Account No</label>
-                                    <div class="col-sm-9">
-                                        <input type="text" name="account_no" class="form-control"
-                                            id="horizontal-account-input" placeholder="0123456789 ">
-                                    </div>
-                                </div>
-                                <div class="row mb-4">
-                                    <label for="horizontal-bank-select" class="col-sm-3 col-form-label">Bank</label>
-                                    <div class="col-sm-9">
-                                        <select name="bank" id="horizontal-bank-select" class="form-control select2">
-                                            <option>Select</option>
+                                            @if (isset($loan))
+                                                <option value="{{ $loan->member_id ?? '' }}" selected>
+                                                    {{ $loan->member->name ?? '' }}
+                                                </option>
+                                            @endif
+
                                         </select>
+                                        <button type="button" name="reset"
+                                        class="btn btn-warning w-md mt-2" onclick="clearMemberInput()">Clear</button>
                                     </div>
                                 </div>
-                                <div class="row mb-4">
-                                    <label for="horizontal-name-input" class="col-sm-3 col-form-label">Name</label>
-                                    <div class="col-sm-9">
-                                        <input type="text" name="name" class="form-control" id="horizontal-name-input"
-                                            placeholder="" readonly>
-                                    </div>
+                            </div>
+                            <div class="row mb-4">
+                                <label for="horizontal-account-input" class="col-sm-3 col-form-label">Account No</label>
+                                <div class="col-sm-9">
+                                    <input type="text" name="account_no" class="form-control"
+                                        id="horizontal-account-input" placeholder="0123456789 "
+                                        value="{{ $loan->beneficiary_account_no ?? '' }}">
                                 </div>
+                            </div>
+                            <div class="row mb-4">
+                                <label for="horizontal-bank-select" class="col-sm-3 col-form-label">Bank</label>
+                                <div class="col-sm-9">
+                                    <select name="bank" id="horizontal-bank-select" class="form-control select2">
+                                        <option value="">Select</option>
+                                        @foreach ($banks as $bank)
+                                            <option value="{{ $bank->code }}"
+                                                {{ isset($loan) && $loan->beneficiary_bank == $bank->code ? 'selected' : '' }}>
+                                                {{ $bank->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-4">
+                                <label for="horizontal-name-input" class="col-sm-3 col-form-label">Name</label>
+                                <div class="col-sm-9">
+                                    <input type="text" name="name" class="form-control" id="horizontal-name-input"
+                                        placeholder="" value="{{ $loan->beneficiary_name ?? '' }}" readonly>
+                                </div>
+                            </div>
 
-                                <div class="row mb-4">
-                                    <label for="horizontal-amount-input" class="col-sm-3 col-form-label">Loan Amount</label>
-                                    <div class="col-sm-9">
-                                        <input type="number" name="amount" class="form-control"
-                                            id="horizontal-amount-input" placeholder="120000">
-                                    </div>
+                            <div class="row mb-4">
+                                <label for="horizontal-amount-input" class="col-sm-3 col-form-label">Loan Amount</label>
+                                <div class="col-sm-9">
+                                    <input type="number" name="amount" class="form-control" id="horizontal-amount-input"
+                                        placeholder="120000" value="{{ $loan->amount ?? '' }}">
                                 </div>
-                                <div class="row mb-4">
-                                    <label for="horizontal-ramount-input" class="col-sm-3 col-form-label">Repayment Amount</label>
-                                    <div class="col-sm-9">
-                                        <input type="number" name="repayment_amount" class="form-control"
-                                            id="horizontal-ramount-input" placeholder="10000">
-                                    </div>
+                            </div>
+                            <div class="row mb-4">
+                                <label for="horizontal-ramount-input" class="col-sm-3 col-form-label">Repayment
+                                    Amount</label>
+                                <div class="col-sm-9">
+                                    <input type="number" name="repayment_amount" class="form-control"
+                                        id="horizontal-ramount-input" placeholder="10000"
+                                        value="{{ $loan->monthly_repayment ?? '' }}">
                                 </div>
-                                <div class="row mb-4">
-                                    <label for="horizontal-month-select" class="col-sm-3 col-form-label">Start Date</label>
-                                    <div class="col-sm-9 row">
-                                        <div class="col-sm-6">
-                                            <select name="month" id="horizontal-month-select"
-                                            class="form-control select">
+                            </div>
+                            <div class="row mb-4">
+                                <label for="horizontal-interest-input" class="col-sm-3 col-form-label">Interest %</label>
+                                <div class="col-sm-9">
+                                    <input type="number" name="interest" class="form-control"
+                                        id="horizontal-interest-input" placeholder="10"
+                                        value="{{ $loan->interest ?? '' }}">
+                                </div>
+                            </div>
+                            <div class="row mb-4">
+                                <label for="horizontal-month-select" class="col-sm-3 col-form-label">Start Date</label>
+                                <div class="col-sm-9 row">
+                                    <div class="col-sm-6">
+                                        <select name="start_month" id="horizontal-month-select" class="form-control select">
                                             <option value="">Select month</option>
+                                            @foreach ($months as $month)
+                                                <option value="{{ $month->name }}"
+                                                    {{ isset($loan) && $loan->repayment_start_month == $month->name ? 'selected' : '' }}>
+                                                    {{ $month->name }}</option>
+                                            @endforeach
                                         </select>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <input type="text" name="year" class="form-control"
-                                            id="horizontal-year-input" placeholder="Year eg:2023">
-                                        </div>
-                                        
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <input type="text" name="start_year" class="form-control"
+                                            id="horizontal-year-input" placeholder="Year eg:2023"
+                                            value="{{ $loan->repayment_start_year ?? '' }}">
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="row mb-4">
+                                <label for="horizontal-duration-input" class="col-sm-3 col-form-label">Duration <small>(No
+                                        of Months)</small></label>
+                                <div class="col-sm-9">
+                                    <input type="number" name="duration" class="form-control"
+                                        id="horizontal-duration-input" placeholder="12"
+                                        value="{{ $loan->duration ?? '' }}">
+                                </div>
+                            </div>
+                            <div class="row justify-content-end">
+                                <div class="col-sm-9">
+                                    <div>
+                                        <button type="submit" name="add-admin"
+                                            class="btn btn-primary w-md">Submit</button>
                                     </div>
                                 </div>
-                                <div class="row mb-4">
-                                    <label for="horizontal-duration-input" class="col-sm-3 col-form-label">Duration <small>(No of Months)</small></label>
-                                    <div class="col-sm-9">
-                                        <input type="number" name="duration" class="form-control"
-                                            id="horizontal-duration-input" placeholder="12">
-                                    </div>
-                                </div>
-                                <div class="row justify-content-end">
-                                    <div class="col-sm-9">
-                                        <div>
-                                            <button type="submit" name="add-admin"
-                                                class="btn btn-primary w-md">Submit</button>
-                                        </div>
-                                    </div>
-                                </div>
+                            </div>
                             </form>
                         </div>
                         <!-- end card body -->
@@ -168,295 +203,130 @@
                     }),
                     s(".select2-ajax").select2({
                         ajax: {
-                            url: "https://api.github.com/search/repositories",
+                            url: "{{ route('search-member') }}",
                             dataType: "json",
                             delay: 250,
                             data: function(e) {
                                 return {
                                     q: e.term,
-                                    page: e.page
+                                    page: e.page,
+                                    _token: "{{ csrf_token() }}",
                                 };
                             },
-                            processResults: function(e, t) {
-                                return (
-                                    (t.page = t.page || 1), {
-                                        results: e.items,
-                                        pagination: {
-                                            more: 30 * t.page < e.total_count
-                                        },
-                                    }
-                                );
+                            processResults: function(data, t) {
+                                console.log(data);
+                                return {
+                                    results: data.items,
+                                    pagination: {
+                                        more: 30 * t.page < data.total_count
+                                    },
+                                };
                             },
-                            cache: !0,
+                            cache: true
                         },
-                        placeholder: "Search for a member",
+
                         minimumInputLength: 1,
                         templateResult: function(e) {
                             if (e.loading) return e.text;
                             var t = s(
-                                "<div class='select2-result-repository clearfix'><div class='select2-result-repository__meta'><div class='select2-result-repository__title'></div><div class='select2-result-repository__description'></div><div class='select2-result-repository__statistics'></div></div></div>"
+                                "<div class='select2-result-repository clearfix'><div class='select2-result-repository__meta'><div class='select2-result-repository__title'></div></div></div>"
                             );
                             return (
-                                t.find(".select2-result-repository__title").text(e.full_name),
-                                t
-                                .find(".select2-result-repository__description")
-                                .text(e.description),
-                                t
+                                t.find(".select2-result-repository__title").text(e.name + " - " + e
+                                    .account_number)
+
                             );
                         },
                         templateSelection: function(e) {
-                            return e.full_name || e.text;
+                            return e.name || e.text;
                         },
-                    }),
-                    s(".select2-templating").select2({
-                        templateResult: function(e) {
-                            return e.id ?
-                                s(
-                                    '<span><img src="assets/images/flags/select2/' +
-                                    e.element.value.toLowerCase() +
-                                    '.png" class="img-flag" /> ' +
-                                    e.text +
-                                    "</span>"
-                                ) :
-                                e.text;
-                        },
-                    }),
-                    s("#colorpicker-default").spectrum(),
-                    s("#colorpicker-showalpha").spectrum({
-                        showAlpha: !0
-                    }),
-                    s("#colorpicker-showpaletteonly").spectrum({
-                        showPaletteOnly: !0,
-                        showPalette: !0,
-                        color: "#34c38f",
-                        palette: [
-                            ["#556ee6", "white", "#34c38f", "rgb(255, 128, 0);", "#50a5f1"],
-                            ["red", "yellow", "green", "blue", "violet"],
-                        ],
-                    }),
-                    s("#colorpicker-togglepaletteonly").spectrum({
-                        showPaletteOnly: !0,
-                        togglePaletteOnly: !0,
-                        togglePaletteMoreText: "more",
-                        togglePaletteLessText: "less",
-                        color: "#556ee6",
-                        palette: [
-                            ["#000", "#444", "#666", "#999", "#ccc", "#eee", "#f3f3f3", "#fff"],
-                            ["#f00", "#f90", "#ff0", "#0f0", "#0ff", "#00f", "#90f", "#f0f"],
-                            [
-                                "#f4cccc",
-                                "#fce5cd",
-                                "#fff2cc",
-                                "#d9ead3",
-                                "#d0e0e3",
-                                "#cfe2f3",
-                                "#d9d2e9",
-                                "#ead1dc",
-                            ],
-                            [
-                                "#ea9999",
-                                "#f9cb9c",
-                                "#ffe599",
-                                "#b6d7a8",
-                                "#a2c4c9",
-                                "#9fc5e8",
-                                "#b4a7d6",
-                                "#d5a6bd",
-                            ],
-                            [
-                                "#e06666",
-                                "#f6b26b",
-                                "#ffd966",
-                                "#93c47d",
-                                "#76a5af",
-                                "#6fa8dc",
-                                "#8e7cc3",
-                                "#c27ba0",
-                            ],
-                            [
-                                "#c00",
-                                "#e69138",
-                                "#f1c232",
-                                "#6aa84f",
-                                "#45818e",
-                                "#3d85c6",
-                                "#674ea7",
-                                "#a64d79",
-                            ],
-                            [
-                                "#900",
-                                "#b45f06",
-                                "#bf9000",
-                                "#38761d",
-                                "#134f5c",
-                                "#0b5394",
-                                "#351c75",
-                                "#741b47",
-                            ],
-                            [
-                                "#600",
-                                "#783f04",
-                                "#7f6000",
-                                "#274e13",
-                                "#0c343d",
-                                "#073763",
-                                "#20124d",
-                                "#4c1130",
-                            ],
-                        ],
-                    }),
-                    s("#colorpicker-showintial").spectrum({
-                        showInitial: !0
-                    }),
-                    s("#colorpicker-showinput-intial").spectrum({
-                        showInitial: !0,
-                        showInput: !0,
-                    }),
-                    s("#timepicker").timepicker({
-                        icons: {
-                            up: "mdi mdi-chevron-up",
-                            down: "mdi mdi-chevron-down"
-                        },
-                        appendWidgetTo: "#timepicker-input-group1",
-                    }),
-                    s("#timepicker2").timepicker({
-                        showMeridian: !1,
-                        icons: {
-                            up: "mdi mdi-chevron-up",
-                            down: "mdi mdi-chevron-down"
-                        },
-                        appendWidgetTo: "#timepicker-input-group2",
-                    }),
-                    s("#timepicker3").timepicker({
-                        minuteStep: 15,
-                        icons: {
-                            up: "mdi mdi-chevron-up",
-                            down: "mdi mdi-chevron-down"
-                        },
-                        appendWidgetTo: "#timepicker-input-group3",
-                    });
-                var i = {};
-                s('[data-toggle="touchspin"]').each(function(e, t) {
-                        var a = s.extend({}, i, s(t).data());
-                        s(t).TouchSpin(a);
-                    }),
-                    s("input[name='demo3_21']").TouchSpin({
-                        initval: 40,
-                        buttondown_class: "btn btn-primary",
-                        buttonup_class: "btn btn-primary",
-                    }),
-                    s("input[name='demo3_22']").TouchSpin({
-                        initval: 40,
-                        buttondown_class: "btn btn-primary",
-                        buttonup_class: "btn btn-primary",
-                    }),
-                    s("input[name='demo_vertical']").TouchSpin({
-                        verticalbuttons: !0
-                    }),
-                    s("input#defaultconfig").maxlength({
-                        warningClass: "badge bg-info",
-                        limitReachedClass: "badge bg-warning",
-                    }),
-                    s("input#thresholdconfig").maxlength({
-                        threshold: 20,
-                        warningClass: "badge bg-info",
-                        limitReachedClass: "badge bg-warning",
-                    }),
-                    s("input#moreoptions").maxlength({
-                        alwaysShow: !0,
-                        warningClass: "badge bg-success",
-                        limitReachedClass: "badge bg-danger",
-                    }),
-                    s("input#alloptions").maxlength({
-                        alwaysShow: !0,
-                        warningClass: "badge bg-success",
-                        limitReachedClass: "badge bg-danger",
-                        separator: " out of ",
-                        preText: "You typed ",
-                        postText: " chars available.",
-                        validate: !0,
-                    }),
-                    s("textarea#textarea").maxlength({
-                        alwaysShow: !0,
-                        warningClass: "badge bg-info",
-                        limitReachedClass: "badge bg-warning",
-                    }),
-                    s("input#placement").maxlength({
-                        alwaysShow: !0,
-                        placement: "top-left",
-                        warningClass: "badge bg-info",
-                        limitReachedClass: "badge bg-warning",
                     });
             }),
-            (s.AdvancedForm = new e()),
-            (s.AdvancedForm.Constructor = e);
+            (s.FormAdvanced = new e()),
+            (s.FormAdvanced.Constructor = e);
         })(window.jQuery),
         (function() {
             "use strict";
-            window.jQuery.AdvancedForm.init();
-        })(),
-        $(function() {
-            "use strict";
-            var o = $(".docs-date"),
-                n = $(".docs-datepicker-container"),
-                r = $(".docs-datepicker-trigger"),
-                l = {
-                    show: function(e) {
-                        console.log(e.type, e.namespace);
+            window.jQuery.FormAdvanced.init();
+        })();
+
+        function getAccountName() {
+            var bank = $('#horizontal-bank-select').val();
+            var account_number = $('#horizontal-account-input').val();
+            if (bank != '' && account_number != '') {
+                $.ajax({
+                    url: "{{ route('get-account-name') }}",
+                    type: "POST",
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        "bank": bank,
+                        "account_number": account_number
                     },
-                    hide: function(e) {
-                        console.log(e.type, e.namespace);
+                    success: function(response) {
+                        if (response.status == true) {
+                            $('#horizontal-name-input').attr('readonly', 'readonly');
+                            $('#horizontal-name-input').val(response.account_name);
+                        } else {
+                            $('#horizontal-name-input').val('');
+                            $('#horizontal-name-input').removeAttr('readonly');
+                        }
+                        
                     },
-                    pick: function(e) {
-                        console.log(e.type, e.namespace, e.view);
-                    },
-                };
-            o
-                .on({
-                    "show.datepicker": function(e) {
-                        console.log(e.type, e.namespace);
-                    },
-                    "hide.datepicker": function(e) {
-                        console.log(e.type, e.namespace);
-                    },
-                    "pick.datepicker": function(e) {
-                        console.log(e.type, e.namespace, e.view);
-                    },
-                })
-                .datepicker(l),
-                $(".docs-options, .docs-toggles").on("change", function(e) {
-                    var t,
-                        a = e.target,
-                        i = $(a),
-                        s = i.attr("name"),
-                        c = "checkbox" === a.type ? a.checked : i.val();
-                    switch (s) {
-                        case "container":
-                            c ? (c = n).show() : n.hide();
-                            break;
-                        case "trigger":
-                            c ? (c = r).prop("disabled", !1) : r.prop("disabled", !0);
-                            break;
-                        case "inline":
-                            (t = $('input[name="container"]')).prop("checked") || t.click();
-                            break;
-                        case "language":
-                            $('input[name="format"]').val($.fn.datepicker.languages[c].format);
+                    error: function(response) {
+                        console.log(response);
                     }
-                    (l[s] = c), o.datepicker("reset").datepicker("destroy").datepicker(l);
-                }),
-                $(".docs-actions").on("click", "button", function(e) {
-                    var t,
-                        a = $(this).data(),
-                        i = a.arguments || [];
-                    e.stopPropagation(),
-                        a.method &&
-                        (a.source ?
-                            o.datepicker(a.method, $(a.source).val()) :
-                            (t = o.datepicker(a.method, i[0], i[1], i[2])) &&
-                            a.target &&
-                            $(a.target).val(t));
                 });
-        });
+            }
+        }
+
+        function getMemberDetail() {
+            var member = $('#horizontal-member-select').val();
+            var account_number = $('#horizontal-account-input');
+            var name = $('#horizontal-name-input');
+            var bank = $('#horizontal-bank-select');
+            if ($.isNumeric(member)) {
+                $.ajax({
+                    url: "{{ route('get-member') }}",
+                    type: "POST",
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        "id": member,
+                    },
+                    success: function(response) {
+                        if (response.status == true) {
+                            name.attr('readonly', 'readonly');
+                            account_number.attr('readonly', 'readonly');
+                            bank.attr('readonly', 'readonly');
+                            name.val(response.name);
+                            account_number.val(response.account_number);
+                            bank.val(response.bank).change();
+                        } else {
+                            name.val('');
+                            account_number.val('');
+                            bank.val('').change();
+                            name.removeAttr('readonly');
+                            account_number.removeAttr('readonly');
+                            bank.removeAttr('readonly');
+                        }
+                    },
+                    error: function(response) {
+                        console.log(response);
+                    }
+                });
+            }
+        }
+
+        function clearMemberInput(){
+            var account_number = $('#horizontal-account-input');
+            var name = $('#horizontal-name-input');
+            var bank = $('#horizontal-bank-select');
+            $('#horizontal-member-select').val('').change();
+            name.val('');
+            account_number.val('');
+            bank.val('').change();
+            name.removeAttr('readonly');
+            account_number.removeAttr('readonly');
+            bank.removeAttr('readonly');
+        }
     </script>
 @endsection

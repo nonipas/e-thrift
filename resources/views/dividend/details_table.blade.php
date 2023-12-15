@@ -175,7 +175,7 @@
             $("#search").click(function(e) {
                 e.preventDefault();
                 //activate a loader for t-body table to show that data is loading
-                $("#t-body").html('<tr><td colspan="7" class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
+                $("#t-body").html('<tr><td colspan="8" class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
 
                 var yr = $("#horizontal-year-input").val();
                 //delay the ajax request for 3 second to allow the loader to show
@@ -191,7 +191,7 @@
                             //set html document title
                             document.title = 'Dividend List For '+yr;
                             $("#t-body").html(response.data);
-                            
+
                         },
                     });
                 }, 3000);
@@ -244,7 +244,7 @@
                                     //hide the preloader
                                     $("#preloader").css("display", "none");
                                     //activate a loader for t-body table to show that data is loading and delay for 3 seconds
-                                    $("#t-body").html('<tr><td colspan="7" class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
+                                    $("#t-body").html('<tr><td colspan="8" class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
                                     setTimeout(function() {
                                         
                                         $("#t-body").html(response.data);

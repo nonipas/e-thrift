@@ -24,6 +24,10 @@ class Loan extends Model
         'repayment_start_month',
         'repayment_status',
         'type',
+        'previous_payment',
+        'repayment_start_year',
+        'parent_loan_id',
+        'paid_out',
     ];
 
     public function member()

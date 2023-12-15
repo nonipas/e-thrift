@@ -69,11 +69,11 @@
                         <span key="t-loan">Loan</span>
                     </a>
                     <ul class="sub-menu" aria-expanded="true">
-                        <li><a href="#" key="t-add-loan">Add New Contribution</a></li>
-                        <li><a href="#" key="t-list-loan">Loan List</a></li>
-                        <li><a href="#" key="t-gm-loan">Generate Monthly Repayment</a></li>
-                        <li><a href="#" key="t-am-loan">Approve Monthly Repayment</a></li>
-                        <li><a href="#" key="t-mlist-loan"> Monthly Repayment list</a></li>
+                        <li><a href="{{route('loan.add')}}" key="t-add-loan">Add New Loan</a></li>
+                        <li><a href="{{route('loan.index')}}" key="t-list-loan">Loan List</a></li>
+                        <li><a href="{{route('loan.generate')}}" key="t-gm-loan">Generate Monthly Repayment</a></li>
+                        <li><a href="{{route('loan.approve')}}" key="t-am-loan">Approve Monthly Repayment</a></li>
+                        <li><a href="{{route('loan.repayment')}}" key="t-mlist-loan"> Monthly Repayment list</a></li>
                     </ul>
                 </li>
 

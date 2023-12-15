@@ -34,6 +34,7 @@ use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\Helpers;
+use App\Models\Month;
 
 /*
 |--------------------------------------------------------------------------
@@ -77,6 +78,7 @@ Route::get('/', function () {
 //get account name route
 Route::post('/get-account-name', [App\Http\Controllers\GeneralController::class, 'getAccountName'])->name('get-account-name');
 Route::get('/search-member', [App\Http\Controllers\GeneralController::class, 'getMembers'])->name('search-member');
+Route::post('/get-member', [App\Http\Controllers\GeneralController::class, 'getMemberDetails'])->name('get-member');
 //save months of the year to database
 Route::get('/save-months', [App\Http\Controllers\GeneralController::class, 'saveMonths'])->name('save-months');
 
@@ -278,28 +280,83 @@ Route::prefix('dividend')->name('dividend.')->group(function (){
 Route::prefix('loans')->name('loan.')->group(function (){
     Route::get('/', function () {
         $pageTitle = "List of loans";
-        return view('loan.table', compact('pageTitle'));
+        $loans = Loan::all();
+        $months = Month::all();
+        return view('loan.table', compact('pageTitle', 'loans', 'months'));
     })->name('index');
 
     Route::get('/add', function () {
         $pageTitle = "Add new loan";
-        return view('loan.form', compact('pageTitle'));
+        $months = Month::all();
+        $banks = Bank::all();
+        $members = Member::where('status',1)->get();
+        return view('loan.form', compact('pageTitle', 'months', 'banks', 'members'));
     })->name('add');
+
+    Route::get('/edit/{id}', function ($id) {
+        $pageTitle = "Edit Loan";
+        $loan = Loan::find($id);
+        $months = Month::all();
+        $banks = Bank::all();
+        $members = Member::where('status',1)->get();
+        return view('loan.form', compact('pageTitle', 'loan', 'members'));
+    })->name('edit');
 
     Route::get('/repayment-list', function () {
         $pageTitle = "Monthly Repayment List";
-        return view('loan.repayment_table', compact('pageTitle'));
+        $repayments = MonthlyRepaymentDetail::all();
+        $repayments = $repayments->take(500);
+        $months = \App\Models\Month::all();
+        $data = array(
+            'year' => '',
+            'month' => '',
+        );
+        $list = true;
+        return view('loan.repayment_table', compact('pageTitle', 'repayments', 'months', 'list', 'data'));
     })->name('repayment');
+
+    Route::get('/monthly_repayment/detail/{id}/approve', function ($id) {
+        $months = \App\Models\Month::all();
+        
+        $monthly_repayment = MonthlyRepayment::find($id);
+        $pageTitle = "Approve monthly contribution for " . $monthly_repayment->month . " " . $monthly_repayment->year;
+        $data = array(
+            'year' => $monthly_repayment->year,
+            'month' => $monthly_repayment->month,
+        );
+
+        $repayments = MonthlyRepaymentDetail::where('monthly_repayment_id', $id)->get();
+        $list = false;
+        return view('loan.repayment_table', compact('pageTitle', 'repayments', 'months', 'list', 'data'));
+    })->name('monthly_detail');
 
     Route::get('/generate_repayment', function () {
         $pageTitle = "Generate monthly repayment";
-        return view('loan.repayment_form', compact('pageTitle'));
+        $months = Month::all();
+        return view('loan.repayment_form', compact('pageTitle', 'months'));
     })->name('generate');
 
     Route::get('/approve-repayment', function () {
         $pageTitle = "Approve monthly repayment";
-        return view('loan.approve', compact('pageTitle'));
+        $repayments = MonthlyRepayment::where('is_approved', 0)->get();
+        return view('loan.approve', compact('pageTitle', 'repayments'));
     })->name('approve');
+
+    Route::post('/store', [LoanController::class, 'store'])->name('store');
+    Route::post('/update/{id}', [LoanController::class, 'update'])->name('update');
+    Route::post('top-up', [LoanController::class, 'storeTopUp'])->name('top_up');
+    Route::post('update-repayment-amount', [LoanController::class, 'updateRepaymentAmount'])->name('update_repayment_amount');
+    Route::get('/deactivate/{id}', [LoanController::class, 'deactivate'])->name('deactivate');
+    Route::get('/activate/{id}', [LoanController::class, 'activate'])->name('activate');
+    Route::post('/generate-monthly', [LoanController::class, 'generateMonthlyRepayment'])->name('generate_monthly');
+    Route::post('/approve-monthly', [LoanController::class, 'approveMonthlyRepayment'])->name('approve_monthly');
+    Route::get('/approve-monthly/{id}', [LoanController::class, 'approveMonthlyRepaymetById'])->name('approve_monthly_id');
+    Route::get('/search-monthly', [LoanController::class, 'searchMonthlyRepayment'])->name('search_monthly');
+
+    Route::post('/approve-monthly/member/{id}', [LoanController::class, 'approveMonthlyRepaymentDetailById'])->name('approve_monthly_member');
+    Route::delete('/reject-monthly/{id}', [LoanController::class, 'rejectMonthlyRepayment'])->name('reject_monthly');
+
+    Route::delete('/reject-monthly/member/{id}', [LoanController::class, 'deleteMonthlyRepaymentDetail'])->name('reject_monthly_member');
 
 });
 

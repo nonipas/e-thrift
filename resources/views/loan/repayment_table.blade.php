@@ -26,8 +26,14 @@
                 <div class="col-12">
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                         <h4 class="mb-sm-0 font-size-18">{{ $pageTitle ?? '' }}</h4>
+                        @if (!$list)
+                            <a href="{{ route('loan.approve') }}"> <button type="submit"
+                                    class="btn btn-success mr-2">View
+                                   Monthly Repayment Aprroval List</button></a>
+                        @else
                         <a href="{{ route('loan.generate') }}"> <button type="submit"
                                 class="btn btn-success mr-2">Generate Monthly Repayment</button></a>
+                        @endif
 
                     </div>
                 </div>
@@ -41,15 +47,20 @@
                     <div class="card">
                         <div class="card-body">
 
-                            <form action="insert.php" method="post">
+                            <form action="" method="post" id="approve-form">
 
                                 <div class="row mb-4">
                                     <label for="horizontal-month-select" class="col-sm-3 col-form-label">Month</label>
                                     <div class="col-sm-9">
-                                        <select name="month" id="horizontal-month-select" class="form-control select">
+                                        <select name="month" id="horizontal-month-select" class="form-control select" {{$list ? '':'disabled'}}>
                                             <option value="">Select month</option>
-                                            <option value="September">September</option>
+                                            @foreach ($months as $month)
+                                                <option value="{{ $month->name }}" {{$month->name == $data['month'] ? 'selected':''}}>{{ $month->name }}</option>
+                                            @endforeach
                                         </select>
+                                        @if (!$list)
+                                            <input type="hidden" name="month" value="{{$data['month']}}">
+                                        @endif
 
                                     </div>
                                 </div>
@@ -58,7 +69,7 @@
                                     <label for="horizontal-year-input" class="col-sm-3 col-form-label">Year</label>
                                     <div class="col-sm-9">
                                         <input type="text" name="year" class="form-control" id="horizontal-year-input"
-                                            placeholder="2023">
+                                            placeholder="2023" {{$list ? '':'readonly'}}>
                                     </div>
                                 </div>
 
@@ -66,10 +77,11 @@
                                     <div class="col-sm-9">
 
                                         <div class="">
-                                            <button type="submit" name="generate"
-                                                class="btn btn-primary w-md">Search</button>
-                                            <button type="button" name="approve" class="btn btn-success w-md"
-                                                id="sa-warning">Approve</button>
+                                            <button type="submit" name="search"
+                                                class="btn btn-primary w-md {{$list ? '':'d-none'}}" id="search" >Search</button>
+                                            
+                                            <button type="button" name="approve" class="btn btn-success w-md {{$list ? 'd-none':''}}"
+                                                id="approve">Approve All</button>
                                         </div>
                                     </div>
                                 </div>
@@ -102,34 +114,49 @@
                                         <th>Month</th>
                                         <th>Year</th>
                                         <th>Status</th>
-                                        <th>Action</th>
+                                        @if($list)
+                                        <th>Approved By</th>
+                                        <th>Date Approved</th>
+                                        @endif
+                                        <th class="{{$list ? 'd-none':''}}">Action</th>
                                     </tr>
                                 </thead>
 
 
-                                <tbody>
+                                <tbody id="t-body">
 
-                                    <tr>
-                                        <td>1</td>
-                                        <td>Nonso Pascal</td>
-                                        <td>{{ number_format('10000', 2) }}</td>
-                                        <td>September</td>
-                                        <td>2023</td>
-                                        <td>Approved</td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-primary dropdown-toggle"
-                                                    data-bs-toggle="dropdown" aria-expanded="false">Action <i
-                                                        class="mdi mdi-chevron-down"></i></button>
-                                                <div class="dropdown-menu">
-                                                    {{-- <a class="dropdown-item btn btn-primary waves-effect waves-light w-sm mr-2"
-                                                        href="#">Edit</a> --}}
-                                                    <a class="dropdown-item" href="#">Delete</a>
-                                                </div>
-                                            </div><!-- /btn-group -->
-                                        </td>
+                                    @foreach ($repayments as $repayment)
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td>{{ $repayment->member->name }}</td>
+                                            <td>{{ number_format($repayment->amount, 2) }}</td>
+                                            <td>{{ $repayment->month }}</td>
+                                            <td>{{ $repayment->year }}</td>
+                                            <td>
+                                                @if ($repayment->is_approved)
+                                                    <span class="badge badge-success">Approved</span>
+                                                @else
+                                                    <span class="badge badge-danger">Pending</span>
+                                                @endif  
+                                            </td>
+                                            @if($list)
+                                            <td>{{ \App\Models\User::where('id',$repayment->approved_by)->first()->name ?? '' }}</td>
+                                            <td>{{ $repayment->approved_at ? date('Y-m-d H:i:s',strtotime($repayment->approved_at)) : '' }}</td>
+                                            @endif
+                                            <td class="{{$list ? 'd-none':''}}">
+                                                @if (!$repayment->is_approved)
+                                                    <a class="btn btn-success btn-sm"
+                                                        href="{{ route('loan.approve_monthly_member', $repayment->id) }}">Approve</a>
+                                                    <a class="btn btn-success btn-sm" data-repayment-id="{{$repayment->id}}" id="update-amount"
+                                                        href="#">Update Amount</a>    
+                                                @else
+                                                    <a class="btn btn-danger btn-sm"
+                                                        href="{{ route('loan.reject_monthly_member', $repayment->id) }}">Reject</a>
+                                                @endif
+                                            </td>
 
-                                    </tr>
+                                        </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
 
@@ -140,6 +167,41 @@
             {{-- table ends --}}
 
         </div> <!-- container-fluid -->
+    </div>
+    <!-- End Page-content -->
+    {{-- modal for update amount --}}
+    <div class="modal fade" id="update-amount-modal" tabindex="-1" role="dialog" aria-labelledby="update-amount-modalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+
+                <form action="{{ route('loan.update_repayment_amount') }}" method="post" id="update-amount-form">
+                    @csrf
+                    <input type="hidden" name="repayment_id" id="repaymentId">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="update-amount-modalLabel">Update Repayment Amount</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        
+                        <div class="row mb-4">
+                            <label for="horizontal-ramount-input" class="col-sm-3 col-form-label">Repayment
+                                Amount</label>
+                            <div class="col-sm-9">
+                                <input type="number" name="repayment_amount" class="form-control"
+                                    id="horizontal-ramount-input" placeholder="10000">
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Submit</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -166,31 +228,113 @@
     <script src="{{ asset('assets/js/pages/datatables.init.js') }}"></script>
 
     <script>
-        ! function(t) {
-            "use strict";
 
-            function e() {}
-            e.prototype.init = function() {
-                t("#sa-warning").click(function() {
-                    var month = t("#horizontal-month-select").val();
-                    var yr = t("#horizontal-year-input").val();
-                    Swal.fire({
-                        title: "Are you sure?",
-                        text: "You won't be able to revert this!",
-                        icon: "warning",
-                        showCancelButton: !0,
-                        confirmButtonColor: "#34c38f",
-                        cancelButtonColor: "#f46a6a",
-                        confirmButtonText: "Yes, Approve!"
-                    }).then(function(t) {
-                        t.value && Swal.fire("Approved!", "Repaynent for <strong>"+month+", "+yr+"</strong> approved successfully.", "success")
-                    })
-                })
-            }, t.SweetAlert = new e, t.SweetAlert.Constructor = e
-        }(window.jQuery),
-        function() {
-            "use strict";
-            window.jQuery.SweetAlert.init()
-        }();
+        $(document).ready(function() {
+            $('#update-amount').click(function() {
+                var repaymentId = $(this).data('repaymentId');
+                $('#repaymentId').val(repaymentId);
+
+                $('#update-amount-modal').modal('show');
+            });
+        });
     </script>
+    <script> 
+  
+            //function to get all generated monthly contribution when search button is clicked
+            $(document).ready(function() {
+                $("#search").click(function(e) {
+                    e.preventDefault();
+                    //activate a loader for t-body table to show that data is loading
+                    $("#t-body").html('<tr><td colspan="8" class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
+                    var month = $("#horizontal-month-select").val();
+                    var yr = $("#horizontal-year-input").val();
+                    //delay the ajax request for 3 second to allow the loader to show
+                    setTimeout(function() {
+                        $.ajax({
+                            url: "{{ route('loan.search_monthly') }}",
+                            type: "GET",
+                            data: {
+                                month: month,
+                                year: yr,
+                                _token: "{{ csrf_token() }}"
+                            },
+                            success: function(response) {
+                                //hide class monthly
+                                
+                                $("#t-body").html(response.data);
+                            },
+                        });
+                    }, 3000);
+                });
+            });
+        
+            //function to approve all generated monthly contribution when approve button is clicked
+            $(document).ready(function() {
+                $("#approve").click(function(e) {
+                    e.preventDefault();
+                    //activate the preloader
+                    $("#preloader").css("display", "block");
+        
+                    var month = $("#horizontal-month-select").val();
+                    var yr = $("#horizontal-year-input").val();
+                    //use sweet alet to confirm if user wants to approve
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "You want to approve all generated monthly loan for the selected month and year",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#556ee6',
+                        cancelButtonColor: '#f46a6a',
+                        confirmButtonText: 'Yes, approve it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            //delay the ajax request for 3 second to allow the loader to show
+                            setTimeout(function() {
+                                $.ajax({
+                                    url: "{{ route('loan.approve_monthly') }}",
+                                    type: "POST",
+                                    data: {
+                                        month: month,
+                                        year: yr,
+                                        _token: "{{ csrf_token() }}"
+                                    },
+                                    success: function(response) {
+                                        //check if response is success
+                                        if (response.status == 'success') {
+                                            Swal.fire(
+                                                'Approved!',
+                                                'All generated monthly loan for the selected month and year has been approved.',
+                                                'success'
+                                            )
+                                        }else{
+                                            Swal.fire(
+                                                'Error!',
+                                                response.message,
+                                                'error'
+                                            )
+                                        }
+                                        //hide the preloader
+                                        $("#preloader").css("display", "none");
+                                        //activate a loader for t-body table to show that data is loading and delay for 3 seconds
+                                        $("#t-body").html('<tr><td colspan="8" class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
+                                        Swal.fire(
+                                                'Success!',
+                                                'Monthly Loan For '+month+' '+yr+' has been approved.',
+                                                'success'
+                                            )
+                                        setTimeout(function() {
+                                            //refresh the page
+                                            window.location.reload();
+        
+                                        }, 3000);
+                                    },
+                                });
+                            }, 3000);
+                        }
+                        $("#preloader").css("display", "none");
+                    })
+                });
+            }); 
+            
+</script>
 @endsection

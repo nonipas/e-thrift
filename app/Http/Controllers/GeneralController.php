@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Helpers\Helpers;
+use App\Models\Member;
 use App\Models\Month;
 
 class GeneralController extends Controller
@@ -36,6 +37,27 @@ class GeneralController extends Controller
             'items' => $members,
             'total_count' => count($members),
             'incomplete_results' => true
+        ]);
+    }
+
+    //get member details
+    public function getMemberDetails(Request $request){
+        
+        $id = $request->id;
+
+        $member = Member::find($id);
+
+        if(!$member){
+            return response()->json(['not found'],404);
+        }
+        return response()->json([
+            'status'=>1,
+            'name'=>$member->name,
+            'account_number'=>$member->account_number,
+            'bank'=>$member->bank,
+            'phone'=>$member->phone,
+            'email'=>$member->email,
+            'department'=>$member->department,
         ]);
     }
 

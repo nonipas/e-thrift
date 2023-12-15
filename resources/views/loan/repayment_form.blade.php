@@ -27,7 +27,7 @@
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                         <h4 class="mb-sm-0 font-size-18">{{ $pageTitle ?? '' }}</h4>
 
-                        <a href="{{ route('repayment.monthly') }}"> <button type="submit"
+                        <a href="{{ route('loan.repayment') }}"> <button type="submit"
                                 class="btn btn-success mr-2">View
                                 Monthly Repayment List</button></a>
 
@@ -44,7 +44,7 @@
                         <div class="card-body">
                             <h4 class="card-title mb-4">{{ $pageTitle ?? '' }}</h4>
 
-                            <form action="insert.php" method="post">
+                            <form action="{{route('loan.generate_monthly')}}" method="post">
 
                                 <div class="row mb-4">
                                     <label for="horizontal-month-select" class="col-sm-3 col-form-label">Month</label>
@@ -52,6 +52,9 @@
                                             <select name="month" id="horizontal-month-select"
                                                 class="form-control select">
                                                 <option value="">Select month</option>
+                                                @foreach ($months as $month)
+                                                    <option value="{{ $month->name }}">{{ $month->name }}</option>
+                                                @endforeach
                                             </select>
                                         
                                     </div>
@@ -103,5 +106,7 @@
 
     <!-- form advanced init -->
     <script src="{{ asset('assets/js/pages/form-advanced.init.js') }}"></script>
+
+
 
 @endsection

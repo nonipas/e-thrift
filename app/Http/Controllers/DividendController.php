@@ -30,16 +30,19 @@ class DividendController extends Controller
 
         //check if dividend for year already exists and it is approved
         $dividend = AnnualDividend::where('year', $request->year)->first();
-        if($dividend && $dividend->is_approved == 1){
-            toastr()->error('Dividend for '.$request->year.' exists and is approved');
-            return redirect()->back();
+        if($dividend){
+            if($dividend->is_approved == 1){
+                toastr()->error('Dividend for '.$request->year.' exists and is approved');
+                return redirect()->back();
+            }
+        }else{
+            //create dividend
+            $dividend = AnnualDividend::create([
+                'year' => $request->year,
+                'total_amount' => $request->amount,
+                'total_dividend' => $request->amount,
+            ]);
         }
-
-        $dividend = AnnualDividend::create([
-            'year' => $request->year,
-            'total_amount' => $request->amount,
-            'total_dividend' => $request->amount,
-        ]);
 
         $amount_to_share = $request->amount;
 
@@ -57,19 +60,33 @@ class DividendController extends Controller
 
             $total_dividend = ($contribution->balance / $total_contribution) * $amount_to_share;
 
-            //store in annual dividend details table
-            AnnualDividendDetail::create([
-                'annual_dividend_id' => $dividend->id,
-                'member_id' => $contribution->member_id,
-                'amount' => $total_dividend,
-                'status' => 1,
-                'year' => $request->year,
-            ]);
+            //check if dividend detail exists for member
+            $dividend_detail = AnnualDividendDetail::where('annual_dividend_id', $dividend->id)->where('member_id', $contribution->member_id)->first();
+
+            if($dividend_detail){
+                if($dividend_detail->is_approved == 1){
+                    continue;
+                }
+                $dividend_detail->amount = $total_dividend;
+                $dividend_detail->save();
+            }else{
+                //store in annual dividend details table
+                AnnualDividendDetail::create([
+                    'annual_dividend_id' => $dividend->id,
+                    'member_id' => $contribution->member_id,
+                    'amount' => $total_dividend,
+                    'status' => 1,
+                    'year' => $request->year,
+                ]);
+            }
         }
 
         //update dividend total
         $dividend->total_dividend = $dividend->annualDividendDetails->sum('amount');
         $dividend->save();
+
+        //store activity
+        Helpers::storeActivity('dividend', 'generated dividend for '.$request->year);
 
         toastr()->success('Dividend generated successfully for '.$request->year);
         return redirect()->back();
@@ -163,6 +180,9 @@ class DividendController extends Controller
         $dividend->approved_at = date('Y-m-d H:i:s');
         $dividend->save();
 
+        //store activity
+        Helpers::storeActivity('dividend', 'approved dividend for '.$request->year);
+
         toastr()->success('Dividend approved successfully');
         return response()->json(['status'=>true,'message' => 'Dividend approved successfully','data' => $table_body]);
     }
@@ -181,13 +201,13 @@ class DividendController extends Controller
         //check if dividend exists
         if(!$dividend){
             toastr()->error('Dividend not found');
-            return redirect()->back();
+            return response()->json(['status'=>false,'message' => 'Dividend not found']);
         }
 
         //check if dividend is approved
         if($dividend->is_approved == 1){
             toastr()->error('Dividend already approved');
-            return redirect()->back();
+            return response()->json(['status'=>false,'message' => 'Dividend already approved']);
         }
 
         //get all dividend details
@@ -207,8 +227,11 @@ class DividendController extends Controller
         $dividend->approved_at = date('Y-m-d H:i:s');
         $dividend->save();
 
+        //store activity
+        Helpers::storeActivity('dividend', 'approved dividend for '.$dividend->year);
+
         toastr()->success('Dividend approved successfully');
-        return redirect()->back();
+        return response()->json(['status'=>true,'message' => 'Dividend approved successfully']);
 
     }
 
@@ -247,6 +270,9 @@ class DividendController extends Controller
             $dividend->save();
         }
 
+        //store activity
+        Helpers::storeActivity('dividend', 'approved dividend for '.$dividend_detail->member->name);
+
         toastr()->success('Dividend detail approved successfully');
         return redirect()->back();
     }
@@ -263,14 +289,12 @@ class DividendController extends Controller
 
         //check if dividend exists
         if(!$dividend){
-            toastr()->error('Dividend not found');
-            return redirect()->back();
+            return response()->json(['status'=>false,'message' => 'Dividend not found']);
         }
 
         //check if dividend is approved
         if($dividend->is_approved == 1){
-            toastr()->error('Dividend already approved');
-            return redirect()->back();
+            return response()->json(['status'=>false,'message' => 'Dividend already approved']);
         }
 
         //get all dividend details
@@ -284,8 +308,11 @@ class DividendController extends Controller
         //delete dividend
         $dividend->delete();
 
-        toastr()->success('Dividend deleted successfully');
-        return redirect()->back();
+        //store activity
+        Helpers::storeActivity('dividend', 'deleted dividend for '.$dividend->year);
+
+        
+        return response()->json(['status'=>true,'message' => 'Dividend deleted successfully']);
     }
 
     //delete dividend detail
@@ -308,6 +335,9 @@ class DividendController extends Controller
 
         //delete dividend detail
         $dividend_detail->delete();
+
+        //store activity
+        Helpers::storeActivity('dividend', 'deleted dividend for '.$dividend_detail->member->name);
 
         toastr()->success('Dividend detail deleted successfully');
         return redirect()->back();

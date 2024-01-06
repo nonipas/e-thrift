@@ -25,54 +25,15 @@
             <div class="row">
                 <div class="col-12">
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                        <h4 class="mb-sm-0 font-size-18">{{ $pageTitle ?? '' }}</h4>
-                        <a href="{{ route('payment.batch') }}"> <button type="submit" class="btn btn-success mr-2">Add new
-                                payment</button></a>
+                    <h4 class="mb-sm-0 font-size-18">{{ $pageTitle ?? '' }}</h4>
+                    <div >
+                        <a class="btn btn-warning btn-sm" href="{{ route('payment.process_batches') }}">back</a>
+                    </div>
 
                     </div>
                 </div>
             </div>
             <!-- end page title -->
-
-            {{-- form starts --}}
-            <div class="row">
-
-                <div class="col-xl-8" style="">
-                    <div class="card">
-                        <div class="card-body">
-
-                            <form action="insert.php" method="post">
-
-                                <div class="row mb-4">
-                                    <label for="horizontal-category-select" class="col-sm-3 col-form-label">Select
-                                        Batch</label>
-                                    <div class="col-sm-9">
-                                        <select name="category" id="horizontal-batch-select"
-                                            class="select2 form-control select2">
-                                            <option value="0">All Batches</option>
-                                            <option value="1">UW_COOP_BATCH_PAYMENT_1</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="row justify-content-end">
-                                    <div class="col-sm-9">
-
-                                        <div class="">
-                                            <button type="button" name="process" class="btn btn-success w-md"
-                                                id="sa-warning">Process</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <!-- end card body -->
-                    </div>
-                    <!-- end card -->
-                </div>
-                <!-- end col -->
-            </div>
-            {{-- form ends --}}
 
             {{-- table starts --}}
             <div class="row">
@@ -80,14 +41,20 @@
                     <div class="card">
                         <div class="card-body">
                             <h4 class="card-title">{{ $pageTitle ?? '' }}</h4>
-                            
-                            <table id="datatable-buttons" class="table table-bordered dt-responsive  nowrap w-100">
+                            <form action="{{route('payment.process_selected')}}" method="post" id="payment-form">
+                                @csrf
+                                <input type="hidden" name="batch_id" value="{{$batch->id}}">
+                            <button type="button" name="approve" class="btn btn-primary my-2 mr-2 w-md process-payment {{$batch->is_processed == 1 ? 'd-none' : ''}}"
+                                    >Process</button>
+                            <button type="button" name="reject_selected" class="btn btn-warning my-2 mr-2 w-md {{$batch->is_processed == 1 ? 'd-none' : ''}}"
+                                    onclick="RejectSelected()">Reject Seleted</button>
+                            <table id="datatable" class="table table-striped dt-responsive  wrap w-100">
                                 <thead>
                                     <tr>
-                                        <td>
+                                        <th>
                                             <input type="checkbox" name="check_all"
                                                     id="check-all" value="all" checked>      
-                                        </td>
+                                        </th>
                                         <th>S/N</th>
                                         <th>Batch Name</th>
                                         <th>Category</th>
@@ -97,46 +64,38 @@
                                         <th>Amount</th>
                                         <th>Narration</th>
                                         <th>Status</th>
-                                        <th>Date Added</th>
+                                        <th>Date Approved</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @for ($i = 1; $i < 6; $i++)
+                                    @foreach ($payments as $payment)
                                     <tr>
-                                        <td><input type="checkbox" name="payment_id[]" class="check"
-                                            id="check-{{$i}}" value="{{$i}}" checked></td>
-                                        <td>{{$i}}</td>
-                                        <td>UW_COOP_BATCH_PAYMENT_{{$i}}</td>
-                                        <td>Loan</td>
-                                        <td>Nonso Pascal</td>
-                                        <td>0123456789</td>
-                                        <td>Union Bank</td>
-                                        <td>{{ number_format('10000', 2) }}</td>
-                                        <td>Loan payment</td>
-                                        <td><span class="p-2 text-danger">unapproved</span></td>
-                                        <td>2023/13/08 16:44</td>
+                                        <td><input type="checkbox" name="payments[]" class="check"
+                                            id="check-{{$payment->id}}" value="{{$payment->id}}" checked></td>
+                                        <td>{{$loop->iteration}}</td>
+                                        <td>{{$payment->batch->name}}</td>
+                                        <td>{{$payment->category->name}}</td>
+                                        <td>{{$payment->beneficiary_name}}</td>
+                                        <td>{{$payment->beneficiary_account_no}}</td>
+                                        <td>{{\App\Helpers\Helpers::getBankName($payment->bank)}}</td>
+                                        <td>{{ number_format($payment->amount, 2) }}</td>
+                                        <td>{{$payment->description}}</td>
+                                        <td><span class="p-2 text-{{$payment->is_processed == 1 ? 'success' : 'primary'}}">{{$payment->is_processed == 1 ? 'Processed' : 'Approved'}}</span></td>
+                                        <td>{{date('d M Y H:i:s', strtotime($payment->approved_at))}}</td>
                                         <td>
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-primary dropdown-toggle"
-                                                    data-bs-toggle="dropdown" aria-expanded="false">Action <i
-                                                        class="mdi mdi-chevron-down"></i></button>
-                                                <div class="dropdown-menu">
-                                                    {{-- <a class="dropdown-item btn btn-primary waves-effect waves-light w-sm mr-2"
-                                                        href="#">Edit</a> --}}
-                                                    <a class="dropdown-item" href="#">Delete</a>
-                                                </div>
-                                            </div><!-- /btn-group -->
+                                            <button type="button" class="btn btn-danger btn-sm {{$payment->is_processed == 1 ? 'd-none' : ''}}" onclick="rejectPayment({{$payment->id}})">Reject </button>
                                         </td>
-
                                     </tr>
-                                    @endfor
+                                    @endforeach
                                 </tbody>
-                                <tfoot>
-                                    <a href="{{ route('payment.batch') }}"> <button type="button" name="approve" class="btn btn-success w-md"
-                                        id="sa-warning">Approve</button></a>
-                                </tfoot>
+                                    
                             </table>
-
+                            <button type="button" name="approve" class="btn btn-primary my-2 mr-2 w-md process-payment {{$batch->is_processed == 1 ? 'd-none' : ''}}"
+                                >Process</button>
+                            <button type="button" name="reject_selected" class="btn btn-warning my-2 mr-2 w-md {{$batch->is_processed == 1 ? 'd-none' : ''}}"
+                                onclick="RejectSelected()">Reject Seleted</button>
+                        </form>
                         </div>
                     </div>
                 </div> <!-- end col -->
@@ -167,39 +126,12 @@
     <script src="{{ asset('assets/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js') }}"></script>
 
     <!-- Datatable init js -->
-    <script src="{{ asset('assets/js/pages/datatables.init.js') }}"></script>
+    {{-- <script src="{{ asset('assets/js/pages/datatables.init.js') }}"></script> --}}
 
-    <script>
-        ! function(t) {
-            "use strict";
-
-            function e() {}
-            e.prototype.init = function() {
-                t("#sa-warning").click(function() {
-                    var batch = t("#horizontal-batch-select").val();
-                    var yr = t("#horizontal-year-input").val();
-                    Swal.fire({
-                        title: "Are you sure?",
-                        text: "You won't be able to revert this!",
-                        icon: "warning",
-                        showCancelButton: !0,
-                        confirmButtonColor: "#34c38f",
-                        cancelButtonColor: "#f46a6a",
-                        confirmButtonText: "Yes, Processed!"
-                    }).then(function(t) {
-                        t.value && Swal.fire("Processed!", "Payment for <strong>" + batch +
-                            "</strong> processed successfully.", "success")
-                    })
-                })
-            }, t.SweetAlert = new e, t.SweetAlert.Constructor = e
-        }(window.jQuery),
-        function() {
-            "use strict";
-            window.jQuery.SweetAlert.init()
-        }();
-    </script>
     <script>
         $(document).ready(function() {
+            $('#datatable').DataTable({paging: false,searching: true,scrollY: "400px",scrollCollapse:true});
+
             $('#check-all').click(function() {
                 if ($(this).is(':checked')) {
                     $('.check').prop('checked', true);
@@ -213,6 +145,92 @@
                 
             });
         });
+
+        //function to confirm before submitting form
+        $('.process-payment').click(function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to Process the selected payment?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#556ee6',
+                cancelButtonColor: '#f46a6a',
+                confirmButtonText: 'Yes, process it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('#payment-form').submit();
+                }
+            })
+        });
+
+
+        function rejectPayment(id){
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to reject this payment?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#556ee6',
+                cancelButtonColor: '#f46a6a',
+                confirmButtonText: 'Yes, reject it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var url = "{{ route('payment.reject', '') }}"+"/"+id;
+                    loadUrl(url);
+                }
+            })
+        }
+
+        function rejectSelected(){
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to reject the selected payments?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#556ee6',
+                cancelButtonColor: '#f46a6a',
+                confirmButtonText: 'Yes, reject them!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    //ajax call to delete selected payments
+                    var selected = [];
+                    $('.payments:checked').each(function() {
+                        selected.push($(this).val());
+                    });
+                    $.ajax({
+                        url: "{{ route('payment.reject_selected') }}",
+                        type: "POST",
+                        data: {
+                            "_token": "{{ csrf_token() }}",
+                            "payments": selected
+                        },
+                        success: function(response) {
+                            if (response.status) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Payments rejected successfully.',
+                                    'success'
+                                ).then((result) => {
+                                    location.reload();
+                                })
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    'Something went wrong.',
+                                    'error'
+                                )
+                            }
+                        }
+                    });
+                }
+            })
+        }
+
+    function loadUrl(url){
+        //open the url
+        window.location.href = url;
+    }
 
     </script>
 @endsection

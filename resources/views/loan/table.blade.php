@@ -62,7 +62,7 @@
                                     @foreach ($loans as $loan)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $loan->user->name }}</td>
+                                            <td>{{ $loan->member->name }}</td>
                                             <td>{{ number_format($loan->amount, 2) }}</td>
                                             <td>{{ number_format($loan->monthly_repayment, 2) }}</td>
                                             <td>{{ number_format($loan->total_repayment, 2) }}</td>
@@ -76,7 +76,7 @@
                                                     <div class="dropdown-menu">
                                                         <a class="dropdown-item btn btn-primary waves-effect waves-light w-sm mr-2"
                                                             href="{{route('loan.edit',['id'=>$loan->id])}}">Edit</a>
-                                                        <a class="dropdown-item" href="{{route('loan.view_repayment',['id'=>$loan->id])}}">View Repayment</a>
+                                                        <a class="dropdown-item" href="{{route('loan.view_repayments',['id'=>$loan->id])}}">View Repayment</a>
                                                         <a class="dropdown-item" href="#" data-loan-id="{{$loan->id}}" id="top-up">Top-up Loan</a>
                                                         @if ($loan->repayment_status == 'active')
                                                             <a class="dropdown-item" href="{{route('loan.deactivate',['id'=>$loan->id])}}">Deactivate</a>

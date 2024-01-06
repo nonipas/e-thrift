@@ -54,7 +54,7 @@ class LoanController extends Controller
         }
 
         //check if previous payment request
-        if($request->previous_payment){
+        if($request->previous_payment != null){
             $previous_payment = $request->previous_payment;
         }
 
@@ -77,7 +77,7 @@ class LoanController extends Controller
             'repayment_start_month' => $request->start_month,
             'repayment_start_year' => $request->start_year, 
             'monthly_repayment' => $request->monthly_repayment,
-            'previous_payment' => $request->pevious_payment,
+            'previous_payment' => $previous_payment,
             'total_repayment' => $previous_payment,
             'balance' => $request->amount - $previous_payment,
             'member_id' => $member,
@@ -86,6 +86,10 @@ class LoanController extends Controller
         ]);
 
         if($loan){
+
+            //store activity
+            Helpers::storeActivity('created loan for '.$request->name);
+
             toastr()->success('Loan created successfully');
             return redirect()->back();
         }
@@ -122,7 +126,7 @@ class LoanController extends Controller
         $previous_payment = 0;
         
         //check if previous payment request
-        if($request->pevious_payment){
+        if($request->previous_payment != null){
             $previous_payment = $request->previous_payment;
         }
 
@@ -149,6 +153,8 @@ class LoanController extends Controller
         $loan->previous_payment = $previous_payment;
 
         if($loan->save()){
+            //store activity
+            Helpers::storeActivity('updated loan for '.$request->name);
             toastr()->success('Loan updated successfully');
             return redirect()->back();
         }
@@ -216,6 +222,8 @@ class LoanController extends Controller
         ]);
 
         if($loan){
+            //store activity
+            Helpers::storeActivity('created top up loan for '.$loan->beneficiary_name);
             toastr()->success('Loan created successfully');
             return redirect()->back();
         }
@@ -236,6 +244,8 @@ class LoanController extends Controller
         $loan->repayment_status = 'inactive';
 
         if($loan->save()){
+            //store activity
+            Helpers::storeActivity('deactivated loan for '.$loan->beneficiary_name);
             toastr()->success('Loan deactivated successfully');
             return redirect()->back();
         }
@@ -254,6 +264,8 @@ class LoanController extends Controller
         $loan->repayment_status = 'active';
 
         if($loan->save()){
+            //store activity
+            Helpers::storeActivity('activated loan for '.$loan->beneficiary_name);
             toastr()->success('Loan activated successfully');
             return redirect()->back();
         }
@@ -283,12 +295,14 @@ class LoanController extends Controller
 
         //check if approved monthly repayment exists
         $monthly_repayment = MonthlyRepayment::where('month',$request->month)->where('year',$request->year)->first();
-        if($monthly_repayment->is_approved == 1){
-            toastr()->error('Approved Monthly repayment already exists');
-            return redirect()->back();
-        }
+        if($monthly_repayment){
 
-        if (!$monthly_repayment) {
+            if ($monthly_repayment->is_approved == 1){
+                toastr()->error('Approved Monthly repayment already exists');
+                return redirect()->back();
+            }
+
+        }else {
             //create monthly repayment
             $monthly_repayment = MonthlyRepayment::create([
                 'month' => $request->month,
@@ -307,20 +321,34 @@ class LoanController extends Controller
             //check if monthly repayment details exists
             $monthly_repayment_details = MonthlyRepaymentDetail::where('loan_id',$loan->id)->where('monthly_repayment_id',$monthly_repayment->id)->first();
             if($monthly_repayment_details){
-                continue;
+                //if monthly repayment details is approved, don't update
+                if($monthly_repayment_details->is_approved == 1){
+                    continue;
+                }
+                //update monthly repayment details
+                $monthly_repayment_details->amount = $loan->monthly_repayment;
+                $monthly_repayment_details->save();
+            }else{
+                //create monthly repayment details
+                $monthly_repayment_details = MonthlyRepaymentDetail::create([
+                    'loan_id' => $loan->id,
+                    'member_id' => $loan->member_id,
+                    'monthly_repayment_id' => $monthly_repayment->id,
+                    'amount' => $loan->monthly_repayment,
+                    'month' => $request->month,
+                    'year' => $request->year,
+                ]);
             }
 
-            //create monthly repayment details
-            $monthly_repayment_details = MonthlyRepaymentDetail::create([
-                'loan_id' => $loan->id,
-                'member_id' => $loan->member_id,
-                'monthly_repayment_id' => $monthly_repayment->id,
-                'amount' => $loan->monthly_repayment,
-                'month' => $request->month,
-                'year' => $request->year,
-            ]);
-        }
+            //update monthly repayment total amount
+            $monthly_repayment->total_amount = $monthly_repayment->total_amount + $monthly_repayment_details->amount;
+            $monthly_repayment->save();
 
+        }
+        
+
+        //store activity
+        Helpers::storeActivity('generated monthly repayment for '.$request->month.' '.$request->year);
         toastr()->success('Monthly repayment generated successfully');
         return redirect()->back();
     }
@@ -385,7 +413,8 @@ class LoanController extends Controller
         $monthly_repayment->approved_by = auth()->user()->id ?? 0;
         $monthly_repayment->approved_at = date('Y-m-d H:i:s');
         $monthly_repayment->save();
-
+        //store activity
+        Helpers::storeActivity('approved monthly repayment for '.$request->month.' '.$request->year);
         toastr()->success('Monthly repayment approved successfully');
         return redirect()->back();
     }
@@ -447,7 +476,8 @@ class LoanController extends Controller
         $monthly_repayment->approved_by = auth()->user()->id ?? 0;
         $monthly_repayment->approved_at = date('Y-m-d H:i:s');
         $monthly_repayment->save();
-
+        //store activity
+        Helpers::storeActivity('approved monthly repayment for '.$request->month.' '.$request->year);
         toastr()->success('Monthly repayment for '.$request->month.' '.$request->year.' was approved successfully');
         return redirect()->back();
     }
@@ -493,6 +523,9 @@ class LoanController extends Controller
         $monthly_repayment_detail->approved_at = date('Y-m-d H:i:s');
         $monthly_repayment_detail->save();
 
+        //store activity
+        Helpers::storeActivity('approved monthly repayment for '.$monthly_repayment_detail->member->name);
+
         toastr()->success('Monthly repayment was approved successfully');
         return redirect()->back();
     }
@@ -532,6 +565,9 @@ class LoanController extends Controller
         $repayment->amount = $request->repayment_amount;
         $repayment->save();
 
+        //store activity
+        Helpers::storeActivity('updated repayment amount for '.$repayment->member->name);
+
         toastr()->success('Repayment amount updated successfully');
         return redirect()->back();
     }
@@ -563,7 +599,9 @@ class LoanController extends Controller
 
         //check if monthly repayment details exists
         if(count($monthly_repayment_details) == 0){
-            toastr()->error('Monthly repayment details does not exist');
+            //delete monthly repayment
+            $monthly_repayment->delete();
+            toastr()->success('Monthly repayment for '.$request->month.' '.$request->year.' was deleted successfully');
             return redirect()->back();
         }
 
@@ -606,6 +644,9 @@ class LoanController extends Controller
             $monthly_repayment->delete();
         }
 
+        //store activity
+        Helpers::storeActivity('rejected monthly repayment for '.$request->month.' '.$request->year);
+
         toastr()->success('Monthly repayment for '.$request->month.' '.$request->year.' was rejected successfully');
         return redirect()->back();
     }
@@ -639,6 +680,9 @@ class LoanController extends Controller
         $monthly_repayment_detail->approved_by = null;
         $monthly_repayment_detail->approved_at = null;
         $monthly_repayment_detail->save();
+
+        //store activity
+        Helpers::storeActivity('rejected monthly repayment for '.$monthly_repayment_detail->member->name);
 
         toastr()->success('Monthly repayment approval for '.$monthly_repayment_detail->member->name.' was rejected successfully');
         return redirect()->back();
@@ -675,20 +719,26 @@ class LoanController extends Controller
                 $approved_by = User::find($monthly_repayment_detail->approved_by) ?? '';
                 $date_approved = $monthly_repayment_detail->approved_at ? date('d M Y H:i:s',strtotime($monthly_repayment_detail->approved_at)):'';
                 //if the monthly repayment has been approved, disable the approve button and delete button
-                $approve_button = '<a href="'.route('repayment.approve_monthly_member', $monthly_repayment_detail->id).'" class="btn btn-success btn-sm">Approve</a>';
+                $approve_button = '<a href="'.route('loan.approve_monthly_member', $monthly_repayment_detail->id).'" class="btn btn-success btn-sm">Approve</a>';
                 $update_button = '<a class="btn btn-success btn-sm" data-repayment-id="'.$monthly_repayment_detail->id.'" id="update-amount"
                 href="#">Update Amount</a>';
-                $delete_button = '<a href="'.route('repayment.delete_monthly_detail', $monthly_repayment_detail->id).'" class="btn btn-danger btn-sm">Delete</a>';
+                $delete_button = '<a href="'.route('loan.reject_monthly_member', $monthly_repayment_detail->id).'" class="btn btn-danger btn-sm">Reject</a>';
 
     
                 //table date for button
                 $button = '<td>'.$approve_button.$update_button.'</td>';
     
-                $status = '<span class="badge badge-danger">Pending</span>';
+                $status = '<span class="text-danger">Pending</span>';
                 if($monthly_repayment_detail->is_approved){
                     $button = '<td>'.$delete_button.'</td>';
-                    $status = '<span class="badge badge-success">Approved</span>';
+
+                    $status = '<span class="text-success">Approved</span>';
                 }
+
+                if ($request->list == 1){
+                    $button = '';
+                }
+
                 $table_body .= '<tr>
                 <td>'.$i++.'</td>
                     <td>'.$monthly_repayment_detail->member->name.'</td>
@@ -696,7 +746,7 @@ class LoanController extends Controller
                     <td>'.$monthly_repayment_detail->month.'</td>
                     <td>'.$monthly_repayment_detail->year.'</td>
                     <td>'.$status.'</td>
-                    <td>'.$approved_by.'</td>
+                    <td>'.$approved_by->name.'</td>
                     <td>'.$date_approved.'</td>
                     '.$button.'
                 </tr>';

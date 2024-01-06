@@ -32,11 +32,19 @@ class SettingController extends Controller
             }
             return redirect()->back();
         }
+
         
 
         //loop through settings
 
         foreach ($request->settings as $key => $value) {
+
+            //upload logo
+            if ($request->hasFile($key)) {
+                $logo = Helpers::uploadFile($key, 'assets/images/logo');
+                $value = $logo;
+            }
+
             //check if key exists
             $setting = Setting::where('key', $key)->first();
 

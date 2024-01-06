@@ -24,10 +24,6 @@
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                         <h4 class="mb-sm-0 font-size-18">{{ $pageTitle ?? '' }}</h4>
 
-                        <a href="{{ route('user.index') }}"> <button type="submit" class="btn btn-success mr-2">View
-                                Users List</button></a>
-
-
                     </div>
                 </div>
             </div>
@@ -64,7 +60,7 @@
                                     <label for="horizontal-email-input" class="col-sm-3 col-form-label">Email</label>
                                     <div class="col-sm-9">
                                         <input type="email" name="email" class="form-control"
-                                            id="horizontal-email-input" placeholder="name@email.com" value="{{$user->email ?? ''}}">
+                                            id="horizontal-email-input" placeholder="name@email.com" value="{{$user->email ?? ''}}" disabled>
                                     </div>
                                 </div>
 
@@ -74,7 +70,8 @@
 
                                         <div>
                                             <button type="submit" name="submit"
-                                                class="btn btn-primary w-md">Submit</button>
+                                                class="btn btn-primary w-md mr-2">Submit</button>
+                                                <a href="{{ route('profile.change_password') }}" class="btn btn-success mr-2">Change Password</a>
                                         </div>
                                     </div>
                                 </div>

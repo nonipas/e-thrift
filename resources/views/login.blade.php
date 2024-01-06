@@ -1,15 +1,12 @@
 <!doctype html>
 <html lang="en">
-
-    
-<!-- Mirrored from themesbrand.com/skote-symfony/layouts/auth-login-2.html by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 31 Mar 2022 14:29:27 GMT -->
 <head>
         
         <meta charset="utf-8" />
         <title>Login | E-thrift and Cooperative Management System</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
-        <meta content="Themesbrand" name="author" />
+        <meta content="Management Solution for Cooperative Societies to manage loans, contribution and dividends" name="description" />
+        <meta content="Nosprodev" name="author" />
         <!-- App favicon -->
         <link rel="shortcut icon" href="{{url('/')}}/assets/images/favicon.ico">
 
@@ -96,11 +93,10 @@
                             <div class="w-100">
 
                                 <div class="d-flex flex-column h-100">
-                                    <div class="mb-4 mb-md-5">
+                                    <div class="mb-2 mb-md-5">
                                         <a href="{{url('/')}}" class="d-block auth-logo">
-                                            {{-- <img src="{{url('/')}}/assets/images/logo-dark.png" alt="" height="18" class="auth-logo-dark">
-                                            <img src="{{url('/')}}/assets/images/logo-light.png" alt="" height="18" class="auth-logo-light"> --}}
-                                            E-Thrift
+                                            <img src="{{asset('assets/images/logo-dark.svg')}}" alt="" height="40" class="auth-logo-dark">
+                                            <img src="{{asset('assets/images/logo-dark.svg')}}" alt="" height="40" class="auth-logo-light">
                                         </a>
                                     </div>
                                     <div class="my-auto">
@@ -111,7 +107,8 @@
                                         </div>
             
                                         <div class="mt-4">
-                                            <form action="{{route('login_submit')}}">
+                                            <form action="{{route('login_submit')}}" method="POST">
+                                                @csrf
                 
                                                 <div class="mb-3">
                                                     <label for="username" class="form-label">Email</label>
@@ -120,7 +117,7 @@
                         
                                                 <div class="mb-3">
                                                     <div class="float-end">
-                                                        <a href="#" class="text-muted">Forgot password?</a>
+                                                        <a href="{{route('recover-password')}}" class="text-muted">Forgot password?</a>
                                                     </div>
                                                     <label class="form-label">Password</label>
                                                     <div class="input-group auth-pass-inputgroup">

@@ -24,8 +24,8 @@
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                         <h4 class="mb-sm-0 font-size-18">{{ $pageTitle ?? '' }}</h4>
 
-                        <a href="{{ route('user.index') }}"> <button type="submit" class="btn btn-success mr-2">View
-                                Users List</button></a>
+                        <a href="{{ route('profile.index') }}"> <button type="submit" class="btn btn-success mr-2">View
+                                Profile</button></a>
 
 
                     </div>
@@ -35,7 +35,7 @@
 
             <div class="row">
 
-                <div class="col-xl-8" style="margin: auto">
+                <div class="col-xl-5" style="margin: auto">
                     <div class="card">
                         <div class="card-body">
                             <h4 class="card-title mb-4">{{ $pageTitle ?? '' }}</h4>
@@ -47,19 +47,27 @@
                                 <div class="row mb-4">
                                     <label for="old" class="col-sm-3 col-form-label">Old password</label>
                                     <div class="col-sm-9">
-                                        <input type="password" name="old_password" class="form-control" id="old" >
+                                        <input type="password" name="old_password" class="form-control" id="old" required>
                                     </div>
                                 </div>
                                 <div class="row mb-4">
                                     <label for="new" class="col-sm-3 col-form-label">New password</label>
                                     <div class="col-sm-9">
-                                        <input type="password" name="password" class="form-control" id="new" >
+                                        <div class="input-group">
+                                            <input type="password" name="password" class="form-control " id="new" required>
+                                            <span class="input-group-text" onclick="viewPassword()">
+                                                <i class="fa fa-eye-slash" id="eye"></i>
+                                            </span>
+                                        </div>
+
+                                        
                                     </div>
                                 </div>
                                 <div class="row mb-4">
                                     <label for="confirm" class="col-sm-3 col-form-label">Confirm password</label>
                                     <div class="col-sm-9">
-                                        <input type="password" name="confirm_password" class="form-control" id="confirm" >
+                                        <input type="password" name="confirm_password" class="form-control" id="confirm" required >
+                                        <span class="text-danger small" id="message"></span>
                                     </div>
                                 </div>
 
@@ -102,6 +110,35 @@
     <!-- form advanced init -->
     <script src="{{asset('assets/js/pages/form-advanced.init.js')}}"></script>
     <script>
+
+        //function to view password input
+        function viewPassword() {
+            var x = document.getElementById("new");
+            var y = document.getElementById("confirm");
+            if (x.type === "password" && y.type === "password") {
+                x.type = "text";
+                y.type = "text";
+            } else {
+                x.type = "password";
+                y.type = "password";
+            }
+        }
+
+        //function to check if password match
+        function checkPassword() {
+            var password = document.getElementById("new").value;
+            var confirm_password = document.getElementById("confirm").value;
+            if (password != confirm_password) {
+                document.getElementById("confirm").setCustomValidity("Passwords Don't Match");
+                document.getElementById("message").innerHTML = "Passwords Don't Match";
+            } else {
+                document.getElementById("confirm").setCustomValidity('');
+                document.getElementById("message").innerHTML = "";
+            }
+        }
+
+        //call checkPassword function when confirm password is typed
+        document.getElementById("confirm").onkeyup = checkPassword;
         
     </script>
 @endsection

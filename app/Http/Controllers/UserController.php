@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
+use App\Helpers\Helpers;
 
 class UserController extends Controller
 {
@@ -26,19 +27,36 @@ class UserController extends Controller
     //store user
     public function store(Request $request)
     {
-        //validate request
-        $request->validate([
+
+        //validate using helper class
+        $validate = Helpers::validateRequest($request, [
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'role' => 'required',
         ]);
 
+        //report validation errors
+        if ($validate != 'valid') {
+            foreach ($validate as $error) {
+                toastr()->error($error);
+            }
+            return redirect()->back();
+        }
+
         //generate password with 6 character
         $password = '123456';
+
+        //check if user exists
+        $user = User::where('email', $request->email)->first();
+        if ($user) {
+            notify()->error('User already exists');
+            return redirect()->back();
+        }
 
         //create user
         $user = User::create([
             'name' => $request->name,
+            'username' => $request->email, //if username is not set, use email as username
             'email' => $request->email,
             'phone' => $request->phone ?? null,
             'role_id' => $request->role,
@@ -50,7 +68,10 @@ class UserController extends Controller
         Notification::route('mail', $user->email)
             ->notify(new \App\Notifications\NewUser($user));
 
-        notify()->success('User created successfully');
+        //store activity using helper class
+        Helpers::storeActivity('User created '.$user->name);
+
+        toastr()->success('User created successfully');
         return redirect()->route('user.index');
     }
 
@@ -65,23 +86,33 @@ class UserController extends Controller
     //update user
     public function update(Request $request, $id)
     {
-        //validate request
-        $request->validate([
+        //validate using helper class
+
+        $validate = Helpers::validateRequest($request, [
             'name' => 'required',
-            'email' => 'required|email|unique:users,email,' . $id,
             'role' => 'required',
         ]);
+
+        //report validation errors
+        if ($validate != 'valid') {
+            foreach ($validate as $error) {
+                toastr()->error($error);
+            }
+            return redirect()->back();
+        }
 
         //update user
         $user = User::find($id);
         $user->update([
             'name' => $request->name,
-            'email' => $request->email,
             'phone' => $request->phone ?? null,
             'role_id' => $request->role,
         ]);
 
-        notify()->success('User updated successfully');
+        //store activity using helper class
+        Helpers::storeActivity('User updated '.$user->name);
+
+        toastr()->success('User updated successfully');
         return redirect()->route('user.index');
     }
 
@@ -90,8 +121,9 @@ class UserController extends Controller
     {
         $user = User::find($id);
         $user->delete();
-
-        notify()->success('User deleted successfully');
+        //store activity using helper class
+        Helpers::storeActivity('User deleted '.$user->name);
+        toastr()->success('User deleted successfully');
         return redirect()->route('user.index');
     }
 
@@ -103,7 +135,10 @@ class UserController extends Controller
             'status' => !$user->status,
         ]);
 
-        notify()->success('User status updated successfully');
+        //store activity using helper class
+        Helpers::storeActivity('User status changed for '.$user->name);
+
+        toastr()->success('User status changed successfully');
         return redirect()->route('user.index');
     }
 
@@ -115,18 +150,30 @@ class UserController extends Controller
         Notification::route('mail', $user->email)
             ->notify(new \App\Notifications\ResetPassword($user));
 
-        notify()->success('Password reset link sent successfully');
+        //store activity using helper class
+        Helpers::storeActivity('Password reset link sent to '.$user->name);
+
+        toastr()->success('Password reset link sent successfully');
         return redirect()->route('user.index');
     }
 
     //update full profile
     public function updateProfile(Request $request)
     {
-        //validate request
-        $request->validate([
+
+        //validate using helper class
+        $validate = Helpers::validateRequest($request, [
             'name' => 'required',
             'phone' => 'numeric',
         ]);
+
+        //report validation errors
+        if ($validate != 'valid') {
+            foreach ($validate as $error) {
+                toastr()->error($error);
+            }
+            return redirect()->back();
+        }
 
         //update user
         $user = User::find(auth()->user()->id);
@@ -135,22 +182,34 @@ class UserController extends Controller
             'phone' => $request->phone ?? null,
         ]);
 
-        notify()->success('Profile updated successfully');
+        //store activity using helper class
+        Helpers::storeActivity('Profile updated');
+
+
+        toastr()->success('Profile updated successfully');
         return redirect()->route('profile.index');
     }
 
     //update password
     public function updatePassword(Request $request)
     {
-        //validate request
-        $request->validate([
+        //validate using helper class
+        $validate = Helpers::validateRequest($request, [
             'old_password' => 'required',
             'password' => 'required|confirmed',
         ]);
 
+        //report validation errors
+        if ($validate != 'valid') {
+            foreach ($validate as $error) {
+                toastr()->error($error);
+            }
+            return redirect()->back();
+        }
+
         //check old password
         if (!password_verify($request->old_password, auth()->user()->password)) {
-            notify()->error('Old password does not match');
+            toastr()->error('Old password is incorrect');
             return redirect()->route('profile.index');
         }
 
@@ -160,7 +219,10 @@ class UserController extends Controller
             'password' => bcrypt($request->password),
         ]);
 
-        notify()->success('Password updated successfully');
+        //store activity using helper class
+        Helpers::storeActivity('updated password');
+
+        toastr()->success('Password updated successfully');
         return redirect()->route('profile.change_password');
     }
 

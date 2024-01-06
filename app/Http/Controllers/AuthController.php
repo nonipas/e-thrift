@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Mockery\Generator\StringManipulation\Pass\Pass;
-use App\Models\PasswordReset;
 use App\Helpers\Helpers;
+use App\Models\PasswordResetToken;
 //laravel notify helper
 use Illuminate\Support\Facades\Notification;
 
@@ -30,16 +30,17 @@ class AuthController extends Controller
         }
 
         //check if the database has any user with the role slug super-admin
-        $users = User::all();
+        $users = User::where('role_id', 0)->get();
         if ($users->isEmpty()) {
             //create super admin
             $user = User::create([
                 'name' => 'Super Admin',
-                'email' => 'admin@mail.com',
+                'username' => 'admin',
+                'email' => $request->email,
                 'phone' => '08000000000',
                 'role_id' => 0,
                 'status' => 1,
-                'password' => bcrypt('123456'),
+                'password' => bcrypt($request->password),
             ]);
         }
 
@@ -63,10 +64,10 @@ class AuthController extends Controller
     //reset password
     public function resetPassword($code)
     {
-        $token = PasswordReset::where('token', $code)->first();
+        $token = PasswordResetToken::where('token', $code)->first();
 
         if (!$token) {
-            toastr()->error('Invalid token');
+            toastr()->error('Invalid Password reset token');
             return redirect()->route('login');
         }
 
@@ -78,7 +79,8 @@ class AuthController extends Controller
         //validate request using validate method from helper class
         $validate = Helpers::validateRequest($request, [
             'email' => 'required|email',
-            'password' => 'required|confirmed',
+            'password' => 'required',
+            'confirm_password' => 'required|same:password',
         ]);
 
         //report validation errors
@@ -127,26 +129,7 @@ class AuthController extends Controller
         return redirect()->route('login');
     }
 
-    //verify reset password token
 
-    public function verifyResetPasswordToken(Request $request)
-    {
-        $user = User::where('email', $request->email)->first();
-
-        //verify token
-        $token = PasswordReset::where('token', $request->token)->first();
-
-        if (!$token) {
-            
-            notify()->error('Invalid token');
-        }
-
-        if (!$user) {
-            notify()->error('User not found');
-        }
-
-        return view('reset_password', compact('user', 'token'));
-    }
 
     //send reset password link
 
@@ -172,17 +155,43 @@ class AuthController extends Controller
             return redirect()->back();
         }
 
+        //check if user has a token
+        $token = PasswordResetToken::where('email', $user->email)->first();
+
+        if ($token) {
+            //delete token via email
+            PasswordResetToken::where('email', $user->email)->delete();
+        }
+
         //create token
-        $token = PasswordReset::create([
+        $token = PasswordResetToken::create([
             'email' => $user->email,
             'token' => uniqid(),
         ]);
 
-        //send email
-        $user->sendPasswordResetNotification($token->token);
+        $data = [
+            'token' => $token->token,
+            'name' => $user->name,
+            'email' => $user->email,
+            'url' => route('reset-password', $token->token),
+        ];
 
-        toastr()->success('Password reset link sent to your email');
-        return redirect()->route('login');
+        //send email
+        $user->notify(new \App\Notifications\ResetPassword($data));
+
+        //check if email was sent
+        $mail = Notification::route('mail', $user->email)
+            ->notify(new \App\Notifications\ResetPassword($data));
+
+        if ($mail) {
+            toastr()->success('Password reset link sent to your email');
+            //return route with data
+            return redirect()->route('recover-password')->with('data', $data);
+        }
+
+        toastr()->error('Error sending password reset link');
+
+        return redirect()->back()->with('data', $data);
     }
 
 }

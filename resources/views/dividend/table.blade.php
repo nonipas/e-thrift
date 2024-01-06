@@ -61,7 +61,7 @@
                                 <tbody>
                                     @foreach($dividends as $dividend)
                                     @php
-                                        $total_members = AnnualDividendDetail::where('annual_dividend_id', $dividend->id)->groupBy('member_id')->get()->count();
+                                        $total_members = \App\Models\AnnualDividendDetail::where('annual_dividend_id', $dividend->id)->get()->count();
                                     @endphp
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
@@ -77,7 +77,7 @@
                                             @else
                                                 <button class="btn btn-danger btn-sm" onclick="rejectDividend({{$dividend->id}})">Reject</button>
                                             @endif
-                                            <a class="btn btn-primary btn-sm" href="{{ route('dividend.detail',['id'=>$dividend->id]) }}">View Details</a>
+                                            <a class="btn btn-primary btn-sm" href="{{ route('dividend.details',['id'=>$dividend->id]) }}">View Details</a>
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -128,8 +128,8 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: "{{ route('dividend.approve_id', '') }}",
-                        type: "POST",
+                        url: "{{ route('dividend.approve_id', '') }}/"+id+"",
+                        type: "GET",
                         data: {
                             "_token": "{{ csrf_token() }}",
                             "id": id
@@ -146,7 +146,7 @@
                             } else {
                                 Swal.fire(
                                     'Error!',
-                                    'Something went wrong.',
+                                    response.message,
                                     'error'
                                 )
                             }
@@ -168,8 +168,8 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: "{{ route('dividend.delete', '') }}",
-                        type: "POST",
+                        url: "{{ route('dividend.delete', '') }}/"+id+"",
+                        type: "GET",
                         data: {
                             "_token": "{{ csrf_token() }}",
                             "id": id
@@ -186,7 +186,7 @@
                             } else {
                                 Swal.fire(
                                     'Error!',
-                                    'Something went wrong.',
+                                    response.message,
                                     'error'
                                 )
                             }

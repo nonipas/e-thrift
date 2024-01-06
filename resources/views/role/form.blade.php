@@ -42,7 +42,6 @@
 
                             @if(isset($role))
                                 <form action="{{ route('role.update', $role->id) }}" method="post">
-                                    @method('PUT')
                             @else
                                 <form action="{{ route('role.store') }}" method="post">
                             @endif

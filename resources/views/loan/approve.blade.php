@@ -66,7 +66,7 @@
                                                 @php
                                                 $no_of_beneficiaries = \App\Models\MonthlyRepaymentDetail::where('monthly_repayment_id', $repayment->id)->count();
                                                 
-                                                if($no_of_members > 0){
+                                                if($no_of_beneficiaries > 0){
                                                     echo $no_of_beneficiaries;
                                                 } else {
                                                     echo '0';
@@ -78,6 +78,7 @@
                                                 
                                                     @if (!$repayment->is_approved)
                                                         <button class="btn btn-success btn-sm" onclick="approveMonthlyRepayment({{$repayment->id}})">Approve</button>
+                                                        <button class="btn btn-danger btn-sm" onclick="rejectMonthlyRepayment({{$repayment->id}})">Delete</button>
                                                     @else
                                                         <button class="btn btn-danger btn-sm" onclick="rejectMonthlyRepayment({{$repayment->id}})">Reject</button>
                                                     @endif
@@ -130,7 +131,7 @@
         window.location.href = url;
        }
 
-       function approveMonthlyrepayment(id){
+       function approveMonthlyRepayment(id){
         Swal.fire({
             title: 'Are you sure?',
             text: "You want to approve this monthly repayment",
@@ -147,7 +148,7 @@
         })
        }
 
-       function rejectMonthlyrepayment(id){
+       function rejectMonthlyRepayment(id){
         Swal.fire({
             title: 'Are you sure?',
             text: "You want to reject this monthly repayment",

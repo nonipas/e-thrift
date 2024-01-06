@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->integer('member_id');
-            $table->integer('batch_id');
+            $table->integer('member_id')->nullable();
+            $table->integer('payment_batch_id');
             $table->string('payment_type');
             $table->string('bank')->nullable();
             $table->string('beneficiary_name')->nullable();
             $table->string('beneficiary_account_no')->nullable();
             $table->double('amount', 8, 2)->default(0);
-            $table->string('status')->default('pending');
+            $table->string('description')->nullable();
             $table->boolean('is_approved')->default(0);
             $table->string('approved_by')->nullable();
             $table->timestamp('approved_at')->nullable();

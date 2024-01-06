@@ -135,12 +135,14 @@
                                             <td>{{ !$monthly_contribution_detail->is_approved ? 'Unapproved':'Approved' }}</td>
                                             @if($list)
                                             <td>{{ \App\Models\User::where('id',$monthly_contribution_detail->approved_by)->first()->name ?? '' }}</td>
-                                            <td>{{ $monthly_contribution_detail->approved_at ? date('Y-m-d H:i:s',strtotime($monthly_contribution_detail->approved_at)) : '' }}</td>
+                                            <td>{{ $monthly_contribution_detail->approved_at ? date('d M Y H:i:s',strtotime($monthly_contribution_detail->approved_at)) : '' }}</td>
                                             @endif
                                             <td class="{{$list ? 'd-none':''}}">
                                                     @if (!$monthly_contribution_detail->is_approved)
                                                         <a class="btn btn-success btn-sm"
                                                             href="{{ route('contribution.approve_monthly_member', $monthly_contribution_detail->id) }}">Approve</a>
+                                                        <a class="btn btn-danger btn-sm"
+                                                            href="{{ route('contribution.delete_monthly_detail', $monthly_contribution_detail->id) }}">Delete</a>
                                                             @else
                                                         <a class="btn btn-danger btn-sm"
                                                             href="{{ route('contribution.delete_monthly_detail', $monthly_contribution_detail->id) }}">Reject</a>

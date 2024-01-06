@@ -25,57 +25,19 @@
             <div class="row">
                 <div class="col-12">
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                        <h4 class="mb-sm-0 font-size-18">{{ $pageTitle ?? '' }}</h4>
-                        <a href="{{ route('payment.batch') }}"> <button type="submit" class="btn btn-success mr-2">Add new
-                                payment</button></a>
+                    <h4 class="mb-sm-0 font-size-18">{{ $pageTitle ?? '' }}</h4>
+                    <div >
+                        <a class="btn btn-primary btn-sm mr-2 {{$batch->is_processed == 1 || $batch->is_approved == 1 ? 'd-none' : ''}}"
+                            href="{{route('payment.add_to_batch',['id'=>$batch->id])}}">Add Payment</a>
+                        <a class="btn btn-primary btn-sm mr-2 {{$batch->is_processed == 1 || $batch->is_approved == 0 ? 'd-none' : ''}}"
+                            href="{{route('payment.process_batch',['id'=>$batch->id])}}">Process</a>
+                        <a class="btn btn-warning btn-sm" href="{{ route('payment.approve_batches') }}">back</a>
+                    </div>
 
                     </div>
                 </div>
             </div>
             <!-- end page title -->
-
-            {{-- form starts --}}
-            <div class="row">
-
-                <div class="col-xl-8" style="">
-                    <div class="card">
-                        <div class="card-body">
-
-                            <form action="insert.php" method="post">
-
-                                <div class="row mb-4">
-                                    <label for="horizontal-category-select" class="col-sm-3 col-form-label">Select
-                                        Batch</label>
-                                    <div class="col-sm-9">
-                                        <select name="category" id="horizontal-batch-select"
-                                            class="select2 form-control select2-multiple" multiple="multiple"
-                                            data-placeholder="Choose ...">
-                                            <option value="0">All Batches</option>
-                                            <option value="1">UW_COOP_BATCH_PAYMENT_1</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="row justify-content-end">
-                                    <div class="col-sm-9">
-
-                                        <div class="">
-                                            <button type="submit" name="generate"
-                                                class="btn btn-primary w-md">Search</button>
-                                            <button type="button" name="approve" class="btn btn-success w-md"
-                                                id="sa-warning">Approve</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <!-- end card body -->
-                    </div>
-                    <!-- end card -->
-                </div>
-                <!-- end col -->
-            </div>
-            {{-- form ends --}}
 
             {{-- table starts --}}
             <div class="row">
@@ -83,14 +45,20 @@
                     <div class="card">
                         <div class="card-body">
                             <h4 class="card-title">{{ $pageTitle ?? '' }}</h4>
-                            
-                            <table id="datatable-buttons" class="table table-bordered dt-responsive  nowrap w-100">
+                            <form action="{{route('payment.approve_selected')}}" method="post" id="payment-form">
+                                @csrf
+                                <input type="hidden" name="batch_id" value="{{$batch->id}}">
+                            <button type="button" name="approve" class="btn btn-primary my-2 mr-2 w-md approve-payment {{$batch->is_approved == 1 ? 'd-none' : ''}}"
+                                    >Approve</button>
+                            <button type="button" name="delete_selected" class="btn btn-danger my-2 mr-2 w-md {{$batch->is_approved == 1 ? 'd-none' : ''}}"
+                                    onclick="deleteSelected()">Delete Seleted</button>
+                            <table id="datatable" class="table table-striped dt-responsive  wrap w-100">
                                 <thead>
                                     <tr>
-                                        <td>
+                                        <th>
                                             <input type="checkbox" name="check_all"
                                                     id="check-all" value="all" checked>      
-                                        </td>
+                                        </th>
                                         <th>S/N</th>
                                         <th>Batch Name</th>
                                         <th>Category</th>
@@ -101,45 +69,37 @@
                                         <th>Narration</th>
                                         <th>Status</th>
                                         <th>Date Added</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @for ($i = 1; $i < 6; $i++)
+                                    @foreach ($payments as $payment)
                                     <tr>
-                                        <td><input type="checkbox" name="payment_id" class="check"
-                                            id="check-{{$i}}" value="{{$i}}" checked></td>
-                                        <td>{{$i}}</td>
-                                        <td>UW_COOP_BATCH_PAYMENT_{{$i}}</td>
-                                        <td>Loan</td>
-                                        <td>Nonso Pascal</td>
-                                        <td>0123456789</td>
-                                        <td>Union Bank</td>
-                                        <td>{{ number_format('10000', 2) }}</td>
-                                        <td>Loan payment</td>
-                                        <td><span class="p-2 text-danger">unapproved</span></td>
-                                        <td>2023/13/08 16:44</td>
+                                        <td><input type="checkbox" name="payments[]" class="check"
+                                            id="check-{{$payment->id}}" value="{{$payment->id}}" checked></td>
+                                        <td>{{$loop->iteration}}</td>
+                                        <td>{{$payment->batch->name}}</td>
+                                        <td>{{$payment->category->name}}</td>
+                                        <td>{{$payment->beneficiary_name}}</td>
+                                        <td>{{$payment->beneficiary_account_no}}</td>
+                                        <td>{{\App\Helpers\Helpers::getBankName($payment->bank)}}</td>
+                                        <td>{{ number_format($payment->amount, 2) }}</td>
+                                        <td>{{$payment->description}}</td>
+                                        <td><span class="p-2 text-{{$payment->is_approved == 1 ? 'success' : 'danger'}}">{{$payment->is_approved == 1 ? 'approved' : 'unapproved'}}</span></td>
+                                        <td>{{date('d M Y H:i:s', strtotime($payment->created_at))}}</td>
                                         <td>
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-primary dropdown-toggle"
-                                                    data-bs-toggle="dropdown" aria-expanded="false">Action <i
-                                                        class="mdi mdi-chevron-down"></i></button>
-                                                <div class="dropdown-menu">
-                                                    {{-- <a class="dropdown-item btn btn-primary waves-effect waves-light w-sm mr-2"
-                                                        href="#">Edit</a> --}}
-                                                    <a class="dropdown-item" href="#">Delete</a>
-                                                </div>
-                                            </div><!-- /btn-group -->
+                                            <button type="button" class="btn btn-danger btn-sm {{$payment->is_approved == 1 ? 'd-none' : ''}}" onclick="deletePayment({{$payment->id}})">Delete </button>
                                         </td>
-
                                     </tr>
-                                    @endfor
+                                    @endforeach
                                 </tbody>
-                                <tfoot>
-                                    <a href="{{ route('payment.batch') }}"> <button type="button" name="approve" class="btn btn-success w-md"
-                                        id="sa-warning">Approve</button></a>
-                                </tfoot>
+                                    
                             </table>
-
+                            <button type="button" name="approve" class="btn btn-primary my-2 mr-2 w-md approve-payment {{$batch->is_approved == 1 ? 'd-none' : ''}}"
+                                    >Approve</button>
+                            <button type="button" name="delete_selected" class="btn btn-danger my-2 mr-2 w-md {{$batch->is_approved == 1 ? 'd-none' : ''}}"
+                                    onclick="deleteSelected()">Delete Seleted</button>
+                        </form>
                         </div>
                     </div>
                 </div> <!-- end col -->
@@ -170,39 +130,12 @@
     <script src="{{ asset('assets/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js') }}"></script>
 
     <!-- Datatable init js -->
-    <script src="{{ asset('assets/js/pages/datatables.init.js') }}"></script>
+    {{-- <script src="{{ asset('assets/js/pages/datatables.init.js') }}"></script> --}}
 
-    <script>
-        ! function(t) {
-            "use strict";
-
-            function e() {}
-            e.prototype.init = function() {
-                t("#sa-warning").click(function() {
-                    var batch = t("#horizontal-batch-select").val();
-                    var yr = t("#horizontal-year-input").val();
-                    Swal.fire({
-                        title: "Are you sure?",
-                        text: "You won't be able to revert this!",
-                        icon: "warning",
-                        showCancelButton: !0,
-                        confirmButtonColor: "#34c38f",
-                        cancelButtonColor: "#f46a6a",
-                        confirmButtonText: "Yes, Approve!"
-                    }).then(function(t) {
-                        t.value && Swal.fire("Approved!", "paynent for <strong>" + batch + 
-                            "</strong> approved successfully.", "success")
-                    })
-                })
-            }, t.SweetAlert = new e, t.SweetAlert.Constructor = e
-        }(window.jQuery),
-        function() {
-            "use strict";
-            window.jQuery.SweetAlert.init()
-        }();
-    </script>
     <script>
         $(document).ready(function() {
+            $('#datatable').DataTable({paging: false,searching: true,scrollY: "400px",scrollCollapse:true});
+
             $('#check-all').click(function() {
                 if ($(this).is(':checked')) {
                     $('.check').prop('checked', true);
@@ -216,6 +149,92 @@
                 
             });
         });
+
+        //function to confirm before submitting form
+        $('.approve-payment').click(function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to approve the selected payment?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#556ee6',
+                cancelButtonColor: '#f46a6a',
+                confirmButtonText: 'Yes, approve it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('#payment-form').submit();
+                }
+            })
+        });
+
+
+        function deletePayment(id){
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to delete this payment?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#556ee6',
+                cancelButtonColor: '#f46a6a',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var url = "{{ route('payment.delete', '') }}"+"/"+id;
+                    loadUrl(url);
+                }
+            })
+        }
+
+        function deleteSelected(){
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to delete the selected payments?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#556ee6',
+                cancelButtonColor: '#f46a6a',
+                confirmButtonText: 'Yes, delete them!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    //ajax call to delete selected payments
+                    var selected = [];
+                    $('.payments:checked').each(function() {
+                        selected.push($(this).val());
+                    });
+                    $.ajax({
+                        url: "{{ route('payment.delete_selected') }}",
+                        type: "POST",
+                        data: {
+                            "_token": "{{ csrf_token() }}",
+                            "payments": selected
+                        },
+                        success: function(response) {
+                            if (response.status) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Payments deleted successfully.',
+                                    'success'
+                                ).then((result) => {
+                                    location.reload();
+                                })
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    'Something went wrong.',
+                                    'error'
+                                )
+                            }
+                        }
+                    });
+                }
+            })
+        }
+
+    function loadUrl(url){
+        //open the url
+        window.location.href = url;
+    }
 
     </script>
 @endsection

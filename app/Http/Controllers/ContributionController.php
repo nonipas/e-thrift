@@ -169,43 +169,55 @@ class ContributionController extends Controller
 
         //check if monthly contribution exists and is approved
         $monthly_contribution = MonthlyContribution::where('month', $request->month)->where('year', $request->year)->first();
-        if($monthly_contribution && $monthly_contribution->is_approved){
-            toastr()->error('Monthly contribution already exists');
-            return redirect()->back();
+        if($monthly_contribution){
+            if($monthly_contribution->is_approved){
+                toastr()->error('Monthly contribution already exists');
+                return redirect()->back();
+            }
+
+        }else{
+            //create monthly contribution
+            $monthly_contribution = MonthlyContribution::create([
+                'month' => $request->month,
+                'year' => $request->year,
+            ]);
         }
 
         //get all active contributions
         $contributions = Contribution::all();
 
-        //create monthly contribution
-        $monthly_contribution = MonthlyContribution::create([
-            'month' => $request->month,
-            'year' => $request->year,
-        ]);
-
         //loop through members and create monthly contribution details
         foreach($contributions as $contribution){
 
             //check if approved monthly contribution detail exists for the member and month, then skip
-            $monthly_contribution_detail = MonthlyContributionDetail::where('member_id', $contribution->member_id)->where('month', $request->month)->where('year', $request->year)->where('is_approved',1)->first();
+            $monthly_contribution_detail = MonthlyContributionDetail::where('member_id', $contribution->member_id)->where('month', $request->month)->where('year', $request->year)->first();
             if($monthly_contribution_detail){
-                continue;
+               if($monthly_contribution_detail->is_approved){
+                    continue;
+               }else{
+                    //update monthly contribution detail
+                    $monthly_contribution_detail->update([
+                        'monthly_contribution_id' => $monthly_contribution->id,
+                        'amount' => $contribution->amount,
+                    ]);
+               }
+                
+            }else{
+                //check if member has a contribution and also if the member is active
+                if(!$contribution || !$contribution->member->status){
+                    continue;
+                }
+                //create monthly contribution detail
+                MonthlyContributionDetail::create([
+                    'monthly_contribution_id' => $monthly_contribution->id,
+                    'member_id' => $contribution->member_id,
+                    'amount' => $contribution->amount,
+                    'month' => $request->month,
+                    'year' => $request->year,
+                ]);
             }
 
-            //check if member has a contribution and also if the member is active
-            if(!$contribution || !$contribution->member->status){
-                continue;
-            }
-
-            //create monthly contribution detail
-
-            MonthlyContributionDetail::create([
-                'monthly_contribution_id' => $monthly_contribution->id,
-                'member_id' => $contribution->member_id,
-                'amount' => $contribution->amount,
-                'month' => $request->month,
-                'year' => $request->year,
-            ]);
+            
         }
 
         //get total amount contributed and update monthly contribution
@@ -366,12 +378,6 @@ class ContributionController extends Controller
             toastr()->error('Monthly contribution not found');
             return redirect()->back();
         }
-
-        //check if monthly contribution has been approved
-        // if($monthly_contribution->is_approved){
-        //     toastr()->error('Monthly contribution has already been approved');
-        //     return redirect()->back();
-        // }
 
         //get all monthly contribution details
         $monthly_contribution_details = MonthlyContributionDetail::where('monthly_contribution_id', $monthly_contribution->id)->get();

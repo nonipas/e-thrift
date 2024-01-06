@@ -4,23 +4,19 @@
         <div class="navbar-brand-box">
             <a href="{{url('/')}}" class="logo logo-dark">
                 <span class="logo-sm">
-                    E-thrift
-                    {{-- <img src="{{asset('assets/images/logo.svg" alt="" height="22"> --}}
+                    <img src="{{asset('assets/images/logo-1.svg')}}" alt="" height="22">
                 </span>
                 <span class="logo-lg">
-                    E-thrift
-                    {{-- <img src="{{asset('assets/images/logo-dark.png" alt="" height="17"> --}}
+                    <img src="{{asset('assets/images/logo-1.svg')}}" alt="" height="17">
                 </span>
             </a>
 
             <a href="{{url('/')}}" class="logo logo-light">
                 <span class="logo-sm">
-                    E-thrift
-                    {{-- <img src="{{asset('assets/images/logo-light.svg" alt="" height="22"> --}}
+                    <img src="{{asset('assets/images/logo-1.svg')}}" alt="" width="" height="16">
                 </span>
                 <span class="logo-lg">
-                    E-thrift
-                    {{-- <img src="{{asset('assets/images/logo-light.png" alt="" height="19"> --}}
+                    <img src="{{asset('assets/images/logo-1.svg')}}" alt="" height="16">
                 </span>
             </a>
         </div>

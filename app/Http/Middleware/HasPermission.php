@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\Helpers;
 use App\Models\User;
 
 class HasPermission
@@ -16,11 +17,11 @@ class HasPermission
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, $permission): Response
+    public function handle(Request $request, Closure $next, $permissions): Response
     {
-        if (!auth()->user()->hasPermission($permission)) {
+        if (Helpers::hasAnyPermission($permissions)) {
             //redirect to dashboard with error message
-            notify()->error('You do not have permission to access this page');
+            toastr()->error('You do not have permission to perform this action.', 'Permission Denied');
             return redirect()->route('dashboard');
         }
 

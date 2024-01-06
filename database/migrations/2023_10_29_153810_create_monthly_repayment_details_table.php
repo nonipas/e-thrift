@@ -16,7 +16,7 @@ return new class extends Migration
             $table->integer('monthly_repayment_id');
             $table->integer('member_id');
             $table->integer('loan_id');
-            $table->boolean('amount', 8, 2)->default(0);
+            $table->double('amount', 8, 2)->default(0);
             $table->string('month');
             $table->string('year');
             $table->boolean('is_approved')->default(0);

@@ -65,23 +65,16 @@
                                 <div class="row mb-4">
                                     <label for="horizontal-email-input" class="col-sm-3 col-form-label">Email</label>
                                     <div class="col-sm-9">
-                                        <input type="email" name="email" class="form-control"
-                                            id="horizontal-email-input" placeholder="name@email.com" value="{{$user->email ?? ''}}">
+                                        <input type="email" name="email" class="form-control "
+                                            id="horizontal-email-input" placeholder="name@email.com" value="{{$user->email ?? ''}}" disabled>
                                     </div>
                                 </div>
 
                                 <div class="row mb-4">
                                     <label for="horizontal-role-select" class="col-sm-3 col-form-label">Role</label>
                                     <div class="col-sm-9">
-                                        <select name="role" id="horizontal-role-select" class="form-control select2">
+                                        <select name="role" id="horizontal-role-select" class="form-control select2 " {{($user->role_id??'')==0?'disabled':''}}>
                                             <option>Select</option>
-                                            <option value="1">Admin</option>
-                                            <option value="2">Manager</option>
-                                            <option value="3">Approver</option>
-                                            <option value="4">Admin/Approver</option>
-                                            <option value="5">Admin/Manager</option>
-                                            <option value="6">Super Admin</option>
-                                            <option value="7">Report viewer</option>
                                             @foreach ($roles as $role)
                                                 @if(isset($user))
                                                     <option value="{{ $role->id }}" @if($user->role_id == $role->id) selected @endif>{{ $role->name }}</option>

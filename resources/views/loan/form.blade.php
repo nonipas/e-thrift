@@ -108,7 +108,7 @@
                                 <label for="horizontal-ramount-input" class="col-sm-3 col-form-label">Repayment
                                     Amount</label>
                                 <div class="col-sm-9">
-                                    <input type="number" name="repayment_amount" class="form-control"
+                                    <input type="number" name="monthly_repayment" class="form-control"
                                         id="horizontal-ramount-input" placeholder="10000"
                                         value="{{ $loan->monthly_repayment ?? '' }}">
                                 </div>

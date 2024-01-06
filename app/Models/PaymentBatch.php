@@ -19,4 +19,9 @@ class PaymentBatch extends Model
         'approved_at',
 
     ];
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
 }

@@ -37,6 +37,9 @@ class Helpers
     public static function hasPermission($permission)
     {
         $user = auth()->user();
+        if ($user->role_id == 0) {
+            return true;
+        }
         $role = Role::find($user->role_id);
         $permissions = explode(',', $role->permissions);
         if (in_array($permission, $permissions)) {
@@ -44,6 +47,23 @@ class Helpers
         } else {
             return false;
         }
+    }
+
+    //check if user has any of the permissions
+    public static function hasAnyPermission($permissions)
+    {
+        $user = auth()->user();
+        if ($user->role_id == 0) {
+            return true;
+        }
+        $role = Role::find($user->role_id);
+        $role_permissions = explode(',', $role->permissions);
+        foreach ($permissions as $permission) {
+            if (in_array($permission, $role_permissions)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     //create notify array for laravel notify
@@ -204,6 +224,37 @@ class Helpers
         return $members;
     }
 
-    //get mo
+    //create batch name
+    public static function createBatchName($name){
+        //current date and time
+        $date = date('Y-m-d H:i:s');
+
+        //add current date as suffix and replace space and time seperator with underscore
+        $name = strtoupper($name).'_'.$date;
+        $name = str_replace(' ', '_', $name);
+        $name = str_replace(':', '_', $name);
+        $name = str_replace('-', '_', $name);
+
+        return $name;
+    }
+
+    //upload file
+    public static function uploadFile($file, $path){
+        $name = time().'.'.$file->getClientOriginalExtension();
+        $file->move(public_path($path), $name);
+        return $name;
+    }
+
+    //upload logo
+    public static function uploadLogo($file, $path){
+        $name = 'logo.'.$file->getClientOriginalExtension();
+        //overwrite existing logo
+        if(file_exists(public_path($path.'/'.$name))){
+            unlink(public_path($path.'/'.$name));
+        }
+        
+        $file->move(public_path($path), $name);
+        return $name;
+    }
 
 }

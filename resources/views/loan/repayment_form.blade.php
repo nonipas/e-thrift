@@ -45,7 +45,7 @@
                             <h4 class="card-title mb-4">{{ $pageTitle ?? '' }}</h4>
 
                             <form action="{{route('loan.generate_monthly')}}" method="post">
-
+                                @csrf
                                 <div class="row mb-4">
                                     <label for="horizontal-month-select" class="col-sm-3 col-form-label">Month</label>
                                     <div class="col-sm-9">

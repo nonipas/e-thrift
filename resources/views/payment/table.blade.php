@@ -25,116 +25,19 @@
             <div class="row">
                 <div class="col-12">
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                        <h4 class="mb-sm-0 font-size-18">{{ $pageTitle ?? '' }} Search</h4>
+                        <h4 class="mb-sm-0 font-size-18">{{ $pageTitle ?? '' }}</h4>
+                        @if(isset($search))
+                            <a href="{{ route('payment.index') }}"> <button type="submit"
+                                    class="btn btn-success mr-2">Search</button></a>
+                        @else
                         <a href="{{ route('payment.batch') }}"> <button type="submit"
-                                class="btn btn-success mr-2">Add new payment</button></a>
+                            class="btn btn-success mr-2">back</button></a>
+                        @endif
 
                     </div>
                 </div>
             </div>
             <!-- end page title -->
-
-            {{-- form starts --}}
-            <div class="row">
-
-                <div class="col-xl-8" style="">
-                    <div class="card">
-                        <div class="card-body">
-
-                            <form action="insert.php" method="post">
-
-                                <div class="row mb-4">
-                                    <label for="horizontal-batch-input" class="col-sm-3 col-form-label">By Batch Name</label>
-                                    <div class="col-sm-9">
-                                        <input type="text" name="batch_name" class="form-control" id="horizontal-batch-input"
-                                            >
-                                    </div>
-                                </div>
-
-                                <div class="row mb-4">
-                                    <label for="horizontal-category-select" class="col-sm-3 col-form-label">By Payment Category</label>
-                                    <div class="col-sm-9">
-                                            <select name="category" id="horizontal-type-select"
-                                                class="form-control select2">
-                                                <option>Select</option>
-                                                <option value="loan">Loan payout</option>
-                                                <option value="dividend">Dividend</option>
-                                                <option value="refund">Refund</option>
-                                                <option value="other">Other</option>
-                                            </select>
-                                    </div>
-                                </div>
-
-                                <div class="row mb-4">
-                                    <label for="horizontal-ben-input" class="col-sm-3 col-form-label">By Beneficiary Name</label>
-                                    <div class="col-sm-9">
-                                        <input type="text" name="beneficiary_name" class="form-control" id="horizontal-ben-input"
-                                            >
-                                    </div>
-                                </div>
-
-                                <div class="row mb-4">
-                                    <label for="horizontal-account-input" class="col-sm-3 col-form-label">By Beneficiary Account</label>
-                                    <div class="col-sm-9">
-                                        <input type="text" name="account" class="form-control" id="horizontal-account-input"
-                                            >
-                                    </div>
-                                </div>
-
-                                <div class="row mb-4">
-                                    <label for="horizontal-bank-select" class="col-sm-3 col-form-label">By Bank</label>
-                                    <div class="col-sm-9">
-                                        <select name="bank" id="horizontal-bank-select" class="form-control select2">
-                                            <option>Select</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                
-                                <div class="row mb-4">
-                                    <label class="col-sm-3 col-form-label">By Date</label>
-                                    <div class="col-sm-9">
-                                        <div class="row">
-                                            <div class="col-sm-6">
-                                                <div class="row mb-4">
-                                                    <label for="horizontal-datef-input" class="col-sm-3 col-form-label">From</label>
-                                                    <div class="col-sm-9">
-                                                        <input type="date" name="date_from" class="form-control" id="horizontal-datef-input"
-                                                            >
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <div class="row mb-4">
-                                                    <label for="horizontal-datet-input" class="col-sm-3 col-form-label">To</label>
-                                                    <div class="col-sm-9">
-                                                        <input type="date" name="date_to" class="form-control" id="horizontal-datet-input"
-                                                            >
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row justify-content-end">
-                                    <div class="col-sm-9">
-
-                                        <div class="">
-                                            <button type="submit" name="generate"
-                                                class="btn btn-primary w-md">Search</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <!-- end card body -->
-                    </div>
-                    <!-- end card -->
-                </div>
-                <!-- end col -->
-            </div>
-            {{-- form ends --}}
 
             {{-- table starts --}}
             <div class="row">
@@ -142,11 +45,7 @@
                     <div class="card">
                         <div class="card-body">
 
-                            <h4 class="card-title">{{ $pageTitle ?? '' }}</h4>
-
-                            </p>
-
-                            <table id="datatable-buttons" class="table table-bordered dt-responsive  nowrap w-100">
+                            <table id="datatable-buttons" class="table table-bordered dt-responsive  wrap w-100">
                                 <thead>
                                     <tr>
                                         <th>S/N</th>
@@ -158,41 +57,30 @@
                                         <th>Amount</th>
                                         <th>Narration</th>
                                         <th>Status</th>
-                                        <th>Date Approved</th>
-                                        <th>Date Processed</th>
-                                        <th>Action</th>
+                                        <th class="{{isset($search)?'d-none':''}}">Action</th>
                                     </tr>
                                 </thead>
 
 
                                 <tbody>
 
+                                    @foreach($payments as $payment)
                                     <tr>
-                                        <td>1</td>
-                                        <td>UW_COOP_BATCH_PAYMENT_1</td>
-                                        <td>Loan</td>
-                                        <td>Nonso Pascal</td>
-                                        <td>0123456789</td>
-                                        <td>Union Bank</td>
-                                        <td>{{ number_format('10000', 2) }}</td>
-                                        <td>Loan payment</td>
-                                        <td>Processed</td>
-                                        <td>2023/13/08 16:44</td>
-                                        <td>2023/13/09 16:44</td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-primary dropdown-toggle"
-                                                    data-bs-toggle="dropdown" aria-expanded="false">Action <i
-                                                        class="mdi mdi-chevron-down"></i></button>
-                                                <div class="dropdown-menu">
-                                                    {{-- <a class="dropdown-item btn btn-primary waves-effect waves-light w-sm mr-2"
-                                                        href="#">Edit</a> --}}
-                                                    <a class="dropdown-item" href="#">Delete</a>
-                                                </div>
-                                            </div><!-- /btn-group -->
+                                        <td>{{ $loop->iteration }}</td> 
+                                        <td>{{$payment->batch->name}}</td>
+                                        <td>{{$payment->category->name}}</td>
+                                        <td>{{$payment->beneficiary_name}}</td>
+                                        <td>{{$payment->beneficiary_account_no}}</td>
+                                        <td>{{\App\Helpers\Helpers::getBankName($payment->bank)}}</td>
+                                        <td>{{ number_format($payment->amount, 2) }}</td>
+                                        <td>{{ $payment->description }}</td>
+                                        <td><span class="p-2 text-{{$payment->is_approved == 1 ? 'success' : 'danger'}}">{{$payment->is_approved == 1 ? 'approved' : 'unapproved'}}</span></td>
+                                    
+                                        <td class="{{isset($search)?'d-none':''}}">
+                                            <button type="button" class="btn btn-danger btn-sm {{$payment->is_approved == 1 ? 'd-none' : ''}}" onclick="deletePayment({{$payment->id}})">Delete </button>
                                         </td>
-
                                     </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
 
@@ -229,31 +117,26 @@
     <script src="{{ asset('assets/js/pages/datatables.init.js') }}"></script>
 
     <script>
-        ! function(t) {
-            "use strict";
+        function deletePayment(id){
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to delete this payment?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#556ee6',
+                cancelButtonColor: '#f46a6a',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var url = "{{ route('payment.delete', '') }}"+"/"+id;
+                    loadUrl(url);
+                }
+            })
+        }
 
-            function e() {}
-            e.prototype.init = function() {
-                t("#sa-warning").click(function() {
-                    var month = t("#horizontal-month-select").val();
-                    var yr = t("#horizontal-year-input").val();
-                    Swal.fire({
-                        title: "Are you sure?",
-                        text: "You won't be able to revert this!",
-                        icon: "warning",
-                        showCancelButton: !0,
-                        confirmButtonColor: "#34c38f",
-                        cancelButtonColor: "#f46a6a",
-                        confirmButtonText: "Yes, Approve!"
-                    }).then(function(t) {
-                        t.value && Swal.fire("Approved!", "Repaynent for <strong>"+month+", "+yr+"</strong> approved successfully.", "success")
-                    })
-                })
-            }, t.SweetAlert = new e, t.SweetAlert.Constructor = e
-        }(window.jQuery),
-        function() {
-            "use strict";
-            window.jQuery.SweetAlert.init()
-        }();
+    function loadUrl(url){
+        //open the url
+        window.location.href = url;
+    }
     </script>
 @endsection

@@ -31,15 +31,20 @@
                                     class="btn btn-success mr-2">View
                                    Monthly Repayment Aprroval List</button></a>
                         @else
+                        @if(isset($single))
+                        <a href="{{ route('loan.index') }}"> <button type="submit"
+                                class="btn btn-success mr-2">Loan list</button></a>
+                        @else
                         <a href="{{ route('loan.generate') }}"> <button type="submit"
                                 class="btn btn-success mr-2">Generate Monthly Repayment</button></a>
+                        @endif
                         @endif
 
                     </div>
                 </div>
             </div>
             <!-- end page title -->
-
+            @if(isset($months))
             {{-- form starts --}}
             <div class="row">
 
@@ -94,6 +99,7 @@
                 <!-- end col -->
             </div>
             {{-- form ends --}}
+            @endif
 
             {{-- table starts --}}
             <div class="row">
@@ -134,21 +140,23 @@
                                             <td>{{ $repayment->year }}</td>
                                             <td>
                                                 @if ($repayment->is_approved)
-                                                    <span class="badge badge-success">Approved</span>
+                                                    <span class="text-success">Approved</span>
                                                 @else
-                                                    <span class="badge badge-danger">Pending</span>
+                                                    <span class="text-danger">Pending</span>
                                                 @endif  
                                             </td>
                                             @if($list)
                                             <td>{{ \App\Models\User::where('id',$repayment->approved_by)->first()->name ?? '' }}</td>
-                                            <td>{{ $repayment->approved_at ? date('Y-m-d H:i:s',strtotime($repayment->approved_at)) : '' }}</td>
+                                            <td>{{ $repayment->approved_at ? date('d M Y H:i:s',strtotime($repayment->approved_at)) : '' }}</td>
                                             @endif
                                             <td class="{{$list ? 'd-none':''}}">
                                                 @if (!$repayment->is_approved)
                                                     <a class="btn btn-success btn-sm"
                                                         href="{{ route('loan.approve_monthly_member', $repayment->id) }}">Approve</a>
                                                     <a class="btn btn-success btn-sm" data-repayment-id="{{$repayment->id}}" id="update-amount"
-                                                        href="#">Update Amount</a>    
+                                                        href="#">Update Amount</a>
+                                                    <a class="btn btn-danger btn-sm"
+                                                        href="{{ route('loan.reject_monthly_member', $repayment->id) }}">Reject</a>    
                                                 @else
                                                     <a class="btn btn-danger btn-sm"
                                                         href="{{ route('loan.reject_monthly_member', $repayment->id) }}">Reject</a>
@@ -196,7 +204,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Submit</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
                     </div>
 
                 </form>
@@ -256,6 +264,7 @@
                             data: {
                                 month: month,
                                 year: yr,
+                                list: {{$list ? 1 : 0}},
                                 _token: "{{ csrf_token() }}"
                             },
                             success: function(response) {

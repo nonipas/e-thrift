@@ -44,7 +44,9 @@
                         <div class="card-body">
                             <h4 class="card-title mb-4">{{ $pageTitle ?? '' }}</h4>
 
-                            <form action="insert.php" method="post">
+                            <form action="{{route('payment.store_batch')}}" method="post">
+
+                                @csrf
 
                                 <div class="row mb-4">
                                     <label for="horizontal-name-input" class="col-sm-3 col-form-label">Batch Name</label>

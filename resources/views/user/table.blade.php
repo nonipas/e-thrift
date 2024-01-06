@@ -59,29 +59,6 @@
 
                                 <tbody>
 
-                                    <tr>
-                                        <td>1</td>
-                                        <td>Nonso Pascal</td>
-                                        <td>nonso.pascal</td>
-                                        <td>08050825393</td>
-                                        <td>name@email.com</td>
-                                        <td>Super Admin</td>
-                                        <td>Active</td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-primary dropdown-toggle"
-                                                    data-bs-toggle="dropdown" aria-expanded="false">Action <i
-                                                        class="mdi mdi-chevron-down"></i></button>
-                                                <div class="dropdown-menu">
-                                                    <a class="dropdown-item btn btn-primary waves-effect waves-light w-sm mr-2"
-                                                        href="#">Edit</a>
-                                                    <a class="dropdown-item" href="#">Delete</a>
-                                                    <a class="dropdown-item" href="#">Deactivate</a>
-                                                </div>
-                                            </div><!-- /btn-group -->
-                                        </td>
-
-                                    </tr>
                                     @foreach ($users as $user)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
@@ -89,8 +66,8 @@
                                             <td>{{ $user->username }}</td>
                                             <td>{{ $user->phone }}</td>
                                             <td>{{ $user->email }}</td>
-                                            <td>{{ $user->role->name }}</td>
-                                            <td>{{ $user->status }}</td>
+                                            <td>{{ $user->role->name ?? 'Super Admin' }}</td>
+                                            <td>{{ $user->status ? 'active':'inactive' }}</td>
                                             <td>
                                                 <div class="btn-group">
                                                     <button type="button" class="btn btn-primary dropdown-toggle"

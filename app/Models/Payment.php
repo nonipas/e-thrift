@@ -11,13 +11,13 @@ class Payment extends Model
 
     protected $fillable = [
         'member_id',
-        'batch_id',
+        'payment_batch_id',
         'payment_type',
         'bank',
         'beneficiary_name',
         'beneficiary_account_no',
         'amount',
-        'status',
+        'description',
         'is_approved',
         'approved_by',
         'approved_at',
@@ -33,7 +33,17 @@ class Payment extends Model
 
     public function batch()
     {
-        return $this->belongsTo(Batch::class);
+        return $this->belongsTo(PaymentBatch::class, 'payment_batch_id', 'id');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(PaymentCategory::class, 'payment_type', 'slug');
+    }
+
+    public function bank()
+    {
+        return $this->belongsTo(Bank::class, 'bank', 'code');
     }
 
 }

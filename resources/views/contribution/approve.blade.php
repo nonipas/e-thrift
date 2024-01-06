@@ -78,6 +78,7 @@
                                                 
                                                     @if (!$monthly_contribution->is_approved)
                                                         <button class="btn btn-success btn-sm" onclick="approveMonthlyContribution({{$monthly_contribution->id}})">Approve</button>
+                                                        <button class="btn btn-danger btn-sm" onclick="rejectMonthlyContribution({{$monthly_contribution->id}})">Delete</button>
                                                     @else
                                                         <button class="btn btn-danger btn-sm" onclick="rejectMonthlyContribution({{$monthly_contribution->id}})">Reject</button>
                                                     @endif

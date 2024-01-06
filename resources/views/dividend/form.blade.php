@@ -45,7 +45,7 @@
                             <h4 class="card-title mb-4">{{ $pageTitle ?? '' }}</h4>
 
                             <form action="{{route('dividend.store')}}" method="post">
-
+                                @csrf
                                 <div class="row mb-4">
                                     <label for="horizontal-year-input" class="col-sm-3 col-form-label">Year</label>
                                     <div class="col-sm-9">

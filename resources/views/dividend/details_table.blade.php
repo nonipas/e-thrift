@@ -115,7 +115,7 @@
                                         <td>{{ $dividend->member->name }}</td>
                                         <td>{{ number_format($dividend->amount, 2) }}</td>
                                         <td>{{ number_format($share,1) }}</td>
-                                        <td>{{ number_format($dividend->total_contributions, 2) }}</td>
+                                        <td>{{ number_format($total_contributions, 2) }}</td>
                                         <td>{{ $dividend->year }}</td>
                                         <td>{{ $dividend->is_approved ? 'Approved' : 'Unapproved'}}</td>
                                         <td class="{{$isListForApproval ? '':'d-none'}}">

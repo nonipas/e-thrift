@@ -8,6 +8,7 @@ use App\Models\Permission;
 use App\Models\Bank;
 use App\Models\Member;
 use App\Models\Activity;
+use App\Models\Setting;
 
 
 class Helpers
@@ -246,15 +247,25 @@ class Helpers
     }
 
     //upload logo
-    public static function uploadLogo($file, $path){
-        $name = 'logo.'.$file->getClientOriginalExtension();
+    public static function uploadLogo($file,$name,$path){
+        
+        $name = $name.$file->getClientOriginalExtension();
         //overwrite existing logo
         if(file_exists(public_path($path.'/'.$name))){
             unlink(public_path($path.'/'.$name));
         }
-        
+
         $file->move(public_path($path), $name);
         return $name;
+    }
+
+    //get config settings
+    public static function getConfig($key){
+        $setting = Setting::where('key', $key)->first();
+        if(!$setting){
+            return null;
+        }
+        return $setting->value;
     }
 
 }

@@ -95,8 +95,8 @@
                                 <div class="d-flex flex-column h-100">
                                     <div class="mb-2 mb-md-5">
                                         <a href="{{url('/')}}" class="d-block auth-logo">
-                                            <img src="{{asset('assets/images/logo-dark.svg')}}" alt="" height="40" class="auth-logo-dark">
-                                            <img src="{{asset('assets/images/logo-dark.svg')}}" alt="" height="40" class="auth-logo-light">
+                                            <img src="{{asset('assets/images/logo').'/'.(App\Helpers\Helpers::getConfig('logo_light') ?? 'logo-dark.svg')}}" alt="" height="40" class="auth-logo-dark">
+                                            <img src="{{asset('assets/images/logo').'/'.(App\Helpers\Helpers::getConfig('logo_light') ?? 'logo-light.svg')}}" alt="" height="40" class="auth-logo-light">
                                         </a>
                                     </div>
                                     <div class="my-auto">

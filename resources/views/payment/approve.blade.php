@@ -199,7 +199,7 @@
                 if (result.isConfirmed) {
                     //ajax call to delete selected payments
                     var selected = [];
-                    $('.payments:checked').each(function() {
+                    $('.check:checked').each(function() {
                         selected.push($(this).val());
                     });
                     $.ajax({
@@ -221,7 +221,7 @@
                             } else {
                                 Swal.fire(
                                     'Error!',
-                                    'Something went wrong.',
+                                    response.message,
                                     'error'
                                 )
                             }

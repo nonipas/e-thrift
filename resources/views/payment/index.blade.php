@@ -57,7 +57,7 @@
                                     <div class="col-sm-9">
                                             <select name="category" id="horizontal-type-select"
                                                 class="form-control select2">
-                                                <option>Select</option>
+                                                <option value="">Select</option>
                                                 @foreach ($payment_categories as $category)
                                                     <option value="{{ $category->name }}">{{ $category->name }}</option>
                                                 @endforeach
@@ -70,7 +70,7 @@
                                     <div class="col-sm-9">
                                             <select name="status" id="horizontal-status-select"
                                                 class="form-control select2">
-                                                <option>Select</option>
+                                                <option value="">Select</option>
                                                     <option value="pending" selected >Pending</option>
                                                     <option value="processed">Processed</option>
                                                     <option value="approved">Approved</option>
@@ -98,7 +98,7 @@
                                     <label for="horizontal-bank-select" class="col-sm-3 col-form-label">By Bank</label>
                                     <div class="col-sm-9">
                                         <select name="bank" id="horizontal-bank-select" class="form-control select2">
-                                            <option>Select</option>
+                                            <option value="">Select</option>
                                             @foreach ($banks as $bank)
                                                 <option value="{{ $bank->code }}">{{ $bank->name }}</option>
                                             @endforeach

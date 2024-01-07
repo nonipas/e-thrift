@@ -28,7 +28,7 @@
                                                 <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
                                                     <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
                                                         <a href="{{ url('/') }}" style="display: block; margin: 0 auto; text-align: center;">
-                                                            <img src="{{ url('/') }}/assets/images/logo-dark.png" alt="E-thrift" style="width: auto; height: 70px; object-fit: cover;">
+                                                            <img src="{{ url('/') }}/assets/images/logo/{{App\Helpers\Helpers::getConfig('logo')??'logo-dark.svg'}}" alt="E-thrift" style="width: auto; height: 70px; object-fit: cover;">
                                                         </a>
                                                         <br>
                                                         <h3>Password Reset Success</h3>
@@ -41,7 +41,7 @@
                                                 </tr>
                                                 <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
                                                     <td class="content-block" itemprop="handler" itemscope itemtype="http://schema.org/HttpActionHandler" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
-                                                        <a href="{{ $data['url'] }}" itemprop="url" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; color: #FFF; text-decoration: none; line-height: 2em; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; border-radius: 5px; text-transform: capitalize; background-color: #34c38f; margin: 0; border-color: #34c38f; border-style: solid; border-width: 8px 16px;">
+                                                        <a href="{{ url('/') }}" itemprop="url" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; color: #FFF; text-decoration: none; line-height: 2em; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; border-radius: 5px; text-transform: capitalize; background-color: #34c38f; margin: 0; border-color: #34c38f; border-style: solid; border-width: 8px 16px;">
                                                             Click here to log in
                                                         </a>
                                                     </td>

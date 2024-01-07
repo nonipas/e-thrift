@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,7 +15,7 @@
     
     <!-- Sweet Alert-->
     <link href="{{asset('assets/libs/sweetalert2/sweetalert2.min.css')}}" rel="stylesheet" type="text/css" />
-    @notifyCss
+    
     <!-- third party css -->
     <!-- Bootstrap Css -->
     <link href="{{asset('assets/css/bootstrap.min.css')}}" id="bootstrap-style" rel="stylesheet" type="text/css" />
@@ -105,7 +106,7 @@
     <script src="{{asset('assets/libs/sweetalert2/sweetalert2.min.js')}}"></script>
     <!-- Bootstrap Toasts Js -->
     {{-- <script src="{{asset('assets/js/pages/bootstrap-toastr.init.js')}}"></script> --}}
-    @notifyJs
+
     @yield('script')
     <script src="{{asset('assets/js/app.js')}}"></script>
     @if(isset($message))

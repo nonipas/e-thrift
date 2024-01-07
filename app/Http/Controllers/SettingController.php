@@ -22,7 +22,7 @@ class SettingController extends Controller
     {
         //validate request using validate method from helper class
         $validate = Helpers::validateRequest($request, [
-            'settings' => 'required|array',
+            'setting' => 'required|array',
         ]);
 
         //report validation errors
@@ -37,12 +37,27 @@ class SettingController extends Controller
 
         //loop through settings
 
-        foreach ($request->settings as $key => $value) {
+        foreach ($request->setting as $key => $value) {
 
             //upload logo
             if ($request->hasFile($key)) {
-                $logo = Helpers::uploadFile($key, 'assets/images/logo');
-                $value = $logo;
+                $image = $request->file($key);
+                $imageName = time();
+                if($key == 'logo_dark'){
+                    $imageName = 'logo_dark';
+                }elseif($key == 'logo_light'){
+                    $imageName = 'logo_light';
+                }elseif($key == 'favicon'){
+                    $imageName = 'favicon';
+                }elseif($key == 'icon_light'){
+                    $imageName = 'icon_light';
+                }elseif($key == 'icon_dark'){
+                    $imageName = 'icon_dark';
+                }
+                $imagePath = 'assets/images/logo/';
+                $upload = Helpers::uploadFile($image, $imageName, $imagePath);
+
+                $value = $upload;
             }
 
             //check if key exists

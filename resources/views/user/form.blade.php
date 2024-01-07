@@ -66,7 +66,7 @@
                                     <label for="horizontal-email-input" class="col-sm-3 col-form-label">Email</label>
                                     <div class="col-sm-9">
                                         <input type="email" name="email" class="form-control "
-                                            id="horizontal-email-input" placeholder="name@email.com" value="{{$user->email ?? ''}}" disabled>
+                                            id="horizontal-email-input" placeholder="name@email.com" value="{{$user->email ?? ''}}" {{isset($user->email)?'disabled':''}}>
                                     </div>
                                 </div>
 

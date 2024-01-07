@@ -56,7 +56,7 @@
                                         <a href="{{url('/')}}">
                                             <div class="avatar-md profile-user-wid mb-4">
                                                 <span class="avatar-title rounded-circle bg-light">
-                                                    <img src="{{url('/')}}/assets/images/logo.svg" alt="" class="rounded-circle" height="34">
+                                                    <img src="{{asset('assets/images/logo/').'/'.(App\Helpers\Helpers::getConfig('icon_dark')??'icon-dark.svg')}}" alt="" class="rounded-circle" height="34">
                                                 </span>
                                             </div>
                                         </a>
@@ -111,6 +111,4 @@
         <script src="{{url('/')}}/assets/js/app.js"></script>
 
     </body>
-
-<!-- Mirrored from themesbrand.com/skote-symfony/layouts/auth-login-2.html by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 31 Mar 2022 14:29:28 GMT -->
 </html>

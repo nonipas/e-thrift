@@ -597,6 +597,131 @@ class PaymentController extends Controller
         return redirect()->back();
     }
 
+    //process selected payments
+    public function processSelectedPayments(Request $request)
+    {
+        //validate request using validate request from helper class
+
+        $validate = Helpers::validateRequest($request,[
+            'payments' => 'required',
+        ]);
+
+        //return error if validation fails
+        if($validate != 'valid'){
+            toastr()->error('No payments selected');
+            return redirect()->back();
+        }
+
+        foreach($request->payments as $payment){
+            //find payment
+            $payment = Payment::find($payment);
+
+            //return error message if payment is not found
+            if(!$payment){
+                toastr()->error('Payment Not Found');
+                return redirect()->back();
+            }
+
+            //check if payment is already processed
+            if($payment->is_processed == 1){
+                toastr()->error('Payment Already Processed');
+                return redirect()->back();
+            }
+
+            //process payment
+            $payment->is_processed = 1;
+            $payment->processed_by = auth()->user()->id ?? 0;
+            $payment->processed_at = date('Y-m-d H:i:s');
+            $payment->save();
+        }
+
+        //update batch status if all payments in the batch are processed
+        $batch = PaymentBatch::find($payment->payment_batch_id);
+        $payments = Payment::where('payment_batch_id',$batch->id)->where('is_processed',0)->get();
+
+        if(count($payments) == 0){
+            $batch->is_processed = 1;
+            $batch->processed_by = auth()->user()->id ?? 0;
+            $batch->processed_at = date('Y-m-d H:i:s');
+            $batch->save();
+        }
+
+        //store activity
+        Helpers::storeActivity('processed payments in batch - '.$batch->name);
+
+        //return success message if payment is processed
+        toastr()->success('Payments Processed Successfully');
+        return redirect()->back();
+    }
+
+    //process selected payment batch
+    public function processSelectedPaymentBatch(Request $request)
+    {
+        //validate request using validate request from helper class
+
+        $validate = Helpers::validateRequest($request,[
+            'payment_batches' => 'required',
+        ]);
+
+        //return error if validation fails
+        if($validate != 'valid'){
+            toastr()->error('No payment batches selected');
+            return response()->json([
+                'status' => false,
+                'message' => 'No payment batches selected',
+            ]);
+        }
+
+        foreach($request->payment_batches as $payment_batch){
+            //find payment batch
+            $paymentBatch = PaymentBatch::find($payment_batch);
+
+            //return error message if payment batch is not found
+            if(!$paymentBatch){
+                toastr()->error('Payment Batch Not Found');
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Payment Batch Not Found',
+                ]);
+            }
+
+            //check if payment batch is already processed
+            if($paymentBatch->is_processed == 1){
+                toastr()->error('Payment Batch Already Processed');
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Payment Batch Already Processed',
+                ]);
+            }
+
+            //process payment batch
+            $paymentBatch->is_processed = 1;
+            $paymentBatch->processed_by = auth()->user()->id ?? 0;
+            $paymentBatch->processed_at = date('Y-m-d H:i:s');
+            $paymentBatch->save();
+
+            //process all payments in the batch
+            $payments = Payment::where('payment_batch_id',$payment_batch)->where('is_processed',0)->get();
+
+            foreach($payments as $payment){
+                $payment->is_processed = 1;
+                $payment->processed_by = auth()->user()->id ?? 0;
+                $payment->processed_at = date('Y-m-d H:i:s');
+                $payment->save();
+            }
+        }
+
+        //store activity
+        Helpers::storeActivity('processed payment batches');
+
+        //return success message if payment batch is processed
+        toastr()->success('Payment Batches Processed Successfully');
+        return response()->json([
+            'status' => true,
+            'message' => 'Payment Batches Processed Successfully',
+        ]);
+    }
+
     //reject payment
     public function rejectPayment($id)
     {
@@ -637,7 +762,10 @@ class PaymentController extends Controller
             foreach($validate as $error){
                 toastr()->error($error);
             }
-            return redirect()->back();
+            return response()->json([
+                'status' => false,
+                'message' => implode(',',$validate),
+            ]);
         }
 
         foreach($request->payments as $payment){
@@ -647,7 +775,10 @@ class PaymentController extends Controller
             //return error message if payment is not found
             if(!$payment){
                 toastr()->error('Payment Not Found');
-                return redirect()->back();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Payment Not Found',
+                ]);
             }
 
             //reject payment
@@ -669,7 +800,10 @@ class PaymentController extends Controller
 
         //return success message if payment is rejected
         toastr()->success('Payments Rejected Successfully');
-        return redirect()->back();
+        return response()->json([
+            'status' => true,
+            'message' => 'Payments Rejected Successfully',
+        ]);
     }
 
     //reject selected payment batch
@@ -686,7 +820,10 @@ class PaymentController extends Controller
             foreach($validate as $error){
                 toastr()->error($error);
             }
-            return redirect()->back();
+            return response()->json([
+                'status' => false,
+                'message' => implode(',',$validate),
+            ]);
         }
 
         foreach($request->payment_batches as $payment_batch){
@@ -696,7 +833,10 @@ class PaymentController extends Controller
             //return error message if payment batch is not found
             if(!$paymentBatch){
                 toastr()->error('Payment Batch Not Found');
-                return redirect()->back();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Payment Batch Not Found',
+                ]);
             }
 
             //reject payment batch
@@ -721,7 +861,10 @@ class PaymentController extends Controller
 
         //return success message if payment batch is rejected
         toastr()->success('Payment Batches Rejected Successfully');
-        return redirect()->back();
+        return response()->json([
+            'status' => true,
+            'message' => 'Payment Batches Rejected Successfully',
+        ]);
     }
 
   //process payment batch
@@ -813,7 +956,7 @@ class PaymentController extends Controller
                 toastr()->error($error);
             }
             return response()->json([
-                'status' => 'error',
+                'status' => false,
                 'message' => implode(',',$validate),
             ]);
         }
@@ -826,7 +969,7 @@ class PaymentController extends Controller
             if(!$payment){
                 toastr()->error('Payment Not Found');
                 return response()->json([
-                    'status' => 'error',
+                    'status' => false,
                     'message' => 'Payment Not Found',
                 ]);
             }
@@ -835,7 +978,7 @@ class PaymentController extends Controller
             if($payment->is_approved == 1 || $payment->is_processed == 1){
                 toastr()->error('Payment Cannot Be Deleted');
                 return response()->json([
-                    'status' => 'error',
+                    'status' => false,
                     'message' => 'Payment Cannot Be Deleted',
                 ]);
             }
@@ -873,7 +1016,7 @@ class PaymentController extends Controller
         //return success message if payment is deleted
         toastr()->success('Payments Deleted Successfully');
         return response()->json([
-            'status' => 'success',
+            'status' => true,
             'message' => 'Payments Deleted Successfully',
         ]);
     }
@@ -967,11 +1110,86 @@ class PaymentController extends Controller
         $date_from = date('Y-m-d H:i:s',strtotime($request->date_from.' 00:00:00'));
         $date_to = date('Y-m-d H:i:s',strtotime($request->date_to.' 23:59:59'));
 
-        $condition = [];
+
+        $conditions = '';
+        
+        //if other filters are selected, filter payments
+        if($request->batch_name != ''){
+            $conditions .= 'AND batch_name like "%'.$request->batch_name.'%"';
+        }
+        if($request->category != ''){
+            $conditions .= ' AND payment_type = "'.$request->category.'"';
+        }
+        if($request->beneficiary_name != ''){
+            $conditions .= ' AND beneficiary_name like "%'.$request->beneficiary_name.'%"';
+        }
+        if($request->bank != ''){
+            $conditions .= ' AND bank = "'.$request->bank.'"';
+        }
+        if($request->account != ''){
+            $conditions .= ' AND beneficiary_account_no = "'.$request->account.'"';
+        }
+
+        $payments = Payment::whereRaw('payments.is_processed = 1 AND payments.processed_at >= "'.$date_from.'" AND payments.processed_at <= "'.$date_to.'" '.$conditions)
+        ->leftJoin('payment_batches','payment_batches.id','payments.payment_batch_id')
+        ->select('payments.*','payment_batches.name as batch_name')
+        ->get();
+
+        //remove items that are not in the date range
+        $array = [];
+        foreach($payments as $payment){
+            $processed_at = strtotime($payment->processed_at);
+            if($processed_at >= strtotime($date_from) && $processed_at <= strtotime($date_to)){
+                $array[] = $payment;
+            }
+        }
+
+        $payments = $array;
         
         $search = true;
 
         return view('payment.table', compact('payments','search','pageTitle'));
+
+    }
+
+    //search processed batches by date range
+
+    public function searchProcessedBatches(Request $request)
+    {
+
+        $validate = Helpers::validateRequest($request,[
+            'date_from' => 'required',
+            'date_to' => 'required',
+        ]);
+
+        //return error if validation fails
+        if($validate != 'valid'){
+            toastr()->error('Date Range Required');
+            return redirect()->back();
+        }
+
+        $pageTitle = 'Processed Payment Batches';
+
+        //create date range
+        $date_from = date('Y-m-d H:i:s',strtotime($request->date_from.' 00:00:00'));
+        $date_to = date('Y-m-d H:i:s',strtotime($request->date_to.' 23:59:59'));
+
+        $payment_batches = PaymentBatch::whereRaw('is_processed = 1 AND processed_at >= "'.$date_from.'" AND processed_at <= "'.$date_to.'" ')->get();
+
+        //remove items that are not in the date range
+        $array = [];
+        foreach($payment_batches as $payment_batch){
+            $processed_at = strtotime($payment_batch->processed_at);
+            if($processed_at >= strtotime($date_from) && $processed_at <= strtotime($date_to)){
+                $array[] = $payment_batch;
+            }
+        }
+
+        $batches = $array;
+        
+        $search = true;
+
+        return view('payment.processed.batches', compact('batches','search','pageTitle'));
 
     }
 

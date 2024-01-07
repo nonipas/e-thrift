@@ -65,7 +65,7 @@ Route::post('/send-reset-password-link', [App\Http\Controllers\AuthController::c
 
 //reset password
 Route::get('/reset-password/{code}', [App\Http\Controllers\AuthController::class, 'resetPassword'])->name('reset-password');
-Route::post('/password-reset', [App\Http\Controllers\AuthController::class, 'storeResetPassword'])->name('store-reset-password');
+Route::post('/password-reset', [App\Http\Controllers\AuthController::class, 'storeResetPassword'])->name('store-password-reset');
 
 //verify email
 Route::get('/verify/{code}', [App\Http\Controllers\AuthController::class, 'verifyEmail'])->name('verify-email');
@@ -458,11 +458,24 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/batch/view/process/{id}', function ($id) {
             $batch = PaymentBatch::find($id);
             $pageTitle = "Process Batches and  Make payment";
-            $payments = Payment::where('payment_batch_id', $id)->get();
+            $payments = Payment::where('payment_batch_id', $id)->where('is_approved',1)->get();
             $isListForApproval = true;
             return view('payment.process', compact('pageTitle', 'payments', 'isListForApproval', 'batch'));
         })->name('process');
 
+        Route::get('/batch/view/processed/{id}', function ($id) {
+            $batch = PaymentBatch::find($id);
+            $pageTitle = "Processed Payments for ".$batch->name."";
+            $payments = Payment::where('payment_batch_id', $id)->where('is_approved',1)->where('is_processed',1)->get();
+            return view('payment.processed.payments', compact('pageTitle', 'payments', 'batch'));
+        })->name('processed');
+
+        Route::get('/processed_batches', function () {
+            $pageTitle = "Search Processed Payment Batches";
+            return view('payment.processed.form', compact('pageTitle'));
+        })->name('search_processed');
+
+        Route::post('search/processed_batches', [PaymentController::class, 'searchProcessedBatches'])->name('search_processed_batches');
         Route::post('/create/batch', [PaymentController::class, 'createPaymentBatch'])->name('store_batch');
         Route::post('/store', [PaymentController::class, 'storePayment'])->name('store');
         Route::get('/batch/approve/{id}', [PaymentController::class, 'approvePaymentBatch'])->name('approve_batch');
@@ -475,7 +488,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/delete/{id}', [PaymentController::class, 'deletePayment'])->name('delete');
         Route::post('/delete-selected', [PaymentController::class, 'deleteUnapprovedPayments'])->name('delete_selected');
         Route::post('/approve-selected', [PaymentController::class, 'approveSelectedPayments'])->name('approve_selected');
+        Route::post('/process-selected', [PaymentController::class, 'processSelectedPayments'])->name('process_selected');
         Route::post('/batch/approve-selected', [PaymentController::class, 'approveSelectedPaymentBatch'])->name('approve_selected_batch');
+        Route::post('/batch/process-selected', [PaymentController::class, 'processSelectedPaymentBatch'])->name('process_selected_batch');
         Route::post('/reject-selected', [PaymentController::class, 'rejectSelectedPayments'])->name('reject_selected');
         Route::post('/batch/reject-selected', [PaymentController::class, 'rejectSelectedPaymentBatch'])->name('reject_selected_batch');
         Route::post('/batch/reject/{id}', [PaymentController::class, 'rejectPaymentBatch'])->name('reject_batch');

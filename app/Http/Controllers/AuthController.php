@@ -6,7 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Mockery\Generator\StringManipulation\Pass\Pass;
 use App\Helpers\Helpers;
+use App\Mail\PasswordResetEmail;
 use App\Models\PasswordResetToken;
+use Illuminate\Support\Facades\Mail;
 //laravel notify helper
 use Illuminate\Support\Facades\Notification;
 
@@ -102,10 +104,14 @@ class AuthController extends Controller
         $user->save();
 
         //send email
-        Notification::route('mail', $user->email)
-            ->notify(new \App\Notifications\PasswordResetSuccess());
+        $mail = Mail::to($user->email)->send(new \App\Mail\PasswordResetSuccessEmail($user));
+
+        if (!$mail) {
+            toastr()->error('Error sending password reset link');
+            return redirect()->back();
+        }
         
-        toastr()->success('Password reset successfully');
+        toastr()->success('Password reset successful');
         return redirect()->route('login');
     }
 
@@ -176,13 +182,9 @@ class AuthController extends Controller
             'url' => route('reset-password', $token->token),
         ];
 
-        //send email
-        $user->notify(new \App\Notifications\ResetPassword($data));
-
-        //check if email was sent
-        $mail = Notification::route('mail', $user->email)
-            ->notify(new \App\Notifications\ResetPassword($data));
-
+        //send email using mailable class
+        $mail = Mail::to($user->email)->send(new PasswordResetEmail($data));
+        
         if ($mail) {
             toastr()->success('Password reset link sent to your email');
             //return route with data

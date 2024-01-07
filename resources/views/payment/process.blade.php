@@ -47,7 +47,7 @@
                             <button type="button" name="approve" class="btn btn-primary my-2 mr-2 w-md process-payment {{$batch->is_processed == 1 ? 'd-none' : ''}}"
                                     >Process</button>
                             <button type="button" name="reject_selected" class="btn btn-warning my-2 mr-2 w-md {{$batch->is_processed == 1 ? 'd-none' : ''}}"
-                                    onclick="RejectSelected()">Reject Seleted</button>
+                                    onclick="rejectSelected()">Reject Seleted</button>
                             <table id="datatable" class="table table-striped dt-responsive  wrap w-100">
                                 <thead>
                                     <tr>
@@ -94,7 +94,7 @@
                             <button type="button" name="approve" class="btn btn-primary my-2 mr-2 w-md process-payment {{$batch->is_processed == 1 ? 'd-none' : ''}}"
                                 >Process</button>
                             <button type="button" name="reject_selected" class="btn btn-warning my-2 mr-2 w-md {{$batch->is_processed == 1 ? 'd-none' : ''}}"
-                                onclick="RejectSelected()">Reject Seleted</button>
+                                onclick="rejectSelected()">Reject Seleted</button>
                         </form>
                         </div>
                     </div>
@@ -195,7 +195,7 @@
                 if (result.isConfirmed) {
                     //ajax call to delete selected payments
                     var selected = [];
-                    $('.payments:checked').each(function() {
+                    $('.check:checked').each(function() {
                         selected.push($(this).val());
                     });
                     $.ajax({
@@ -203,12 +203,13 @@
                         type: "POST",
                         data: {
                             "_token": "{{ csrf_token() }}",
+                            "batch_id": "{{$batch->id}}",
                             "payments": selected
                         },
                         success: function(response) {
                             if (response.status) {
                                 Swal.fire(
-                                    'Deleted!',
+                                    'Rejected!',
                                     'Payments rejected successfully.',
                                     'success'
                                 ).then((result) => {
@@ -217,7 +218,7 @@
                             } else {
                                 Swal.fire(
                                     'Error!',
-                                    'Something went wrong.',
+                                    response.message,
                                     'error'
                                 )
                             }

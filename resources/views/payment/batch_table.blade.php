@@ -56,13 +56,13 @@
 
                             @if($isListForApproval)
 
-                            <button type="button" name="approve" class="btn btn-primary my-2 mr-2 w-md approve-batch "
+                            <button type="button" name="approve" class="btn btn-primary my-2 mr-2 w-md approve-batch {{isset($process) ? 'd-none' : ''}}"
                                 >Approve</button>
                             @if(isset($process))
                             <button type="button" name="process" class="btn btn-primary my-2 mr-2 w-md process-payment "
                                 >Process</button>
                             <button type="button" name="reject_selected" class="btn btn-warning my-2 mr-2 w-md "
-                                onclick="RejectSelected()">Reject Seleted</button>
+                                onclick="rejectSelected()">Reject Seleted</button>
                             @endif
                             @endif
                             <table id="datatable" class="table table-striped nowrap w-100">
@@ -129,13 +129,13 @@
                             </table>
                             @if($isListForApproval)
 
-                                <button type="button" name="approve" class="btn btn-primary my-2 mr-2 w-md approve-batch "
+                                <button  type="button" name="approve" class="btn btn-primary my-2 mr-2 w-md approve-batch {{isset($process) ? 'd-none' : ''}}"
                                     >Approve</button>
                                 @if(isset($process))
                                 <button type="button" name="process" class="btn btn-primary my-2 mr-2 w-md process-payment "
                                     >Process</button>
                                 <button type="button" name="reject_selected" class="btn btn-warning my-2 mr-2 w-md "
-                                    onclick="RejectSelected()">Reject Seleted</button>
+                                    onclick="rejectSelected()">Reject Seleted</button>
                                 @endif
                             @endif
                             </form>
@@ -298,7 +298,7 @@
                             } else {
                                 Swal.fire(
                                     'Error!',
-                                    'Something went wrong.',
+                                    response.message,
                                     'error'
                                 )
                             }
@@ -334,7 +334,7 @@
                         success: function(response) {
                             if (response.status) {
                                 Swal.fire(
-                                    'Deleted!',
+                                    'Rejected!',
                                     'Batches rejected successfully.',
                                     'success'
                                 ).then((result) => {
@@ -343,7 +343,7 @@
                             } else {
                                 Swal.fire(
                                     'Error!',
-                                    'Something went wrong.',
+                                    response.message,
                                     'error'
                                 )
                             }

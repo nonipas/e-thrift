@@ -94,7 +94,8 @@
                         <li class="{{Auth::user()->hasPermission('manage-payment') ?'':'d-none'}}"><a href="{{route('payment.batch')}}" key="t-pay-batch-list">Batch List</a></li>
                         <li class="{{Auth::user()->hasPermission('approve-payment') ?'':'d-none'}}"><a href="{{route('payment.approve_batches')}}" key="t-pay-a-batch">Approve Batch</a></li>
                         <li class="{{Auth::user()->hasPermission('process-payment') ?'':'d-none'}}"><a href="{{route('payment.process_batches')}}" key="t-pay-p-list">Process Batch</a></li>
-                        <li><a href="{{route('payment.index')}}" key="t-pay-history">Payment History</a></li>
+                        <li class="{{Auth::user()->hasPermission('manage-payment') ?'':'d-none'}}"><a href="{{route('payment.search_processed')}}" key="t-pay-history">Processed Payment Batches</a></li>
+                        
                     </ul>
                 </li>
                 @endif
@@ -123,6 +124,10 @@
                         </span>
                     </a>
                     <ul class="sub-menu" aria-expanded="true">
+                        <li><a href="{{route('payment.index')}}" key="t-pay-history">Payment History</a></li>
+                        <li><a href="{{route('contribution.monthly_list')}}" key="t-cont-history">Contribution </a></li>
+                        <li><a href="{{route('loan.repayment')}}" key="t-loan-history">Loan Repayment</a></li>
+                        <li><a href="{{route('dividend.index')}}" key="t-dividend-history">Dividend</a></li>
                     </ul>
                 </li>
                 <li>

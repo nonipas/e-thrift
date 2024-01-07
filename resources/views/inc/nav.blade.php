@@ -4,19 +4,19 @@
         <div class="navbar-brand-box">
             <a href="{{url('/')}}" class="logo logo-dark">
                 <span class="logo-sm">
-                    <img src="{{asset('assets/images/logo-1.svg')}}" alt="" height="22">
+                    <img src="{{asset('assets/images/logo').'/'.(App\Helpers\Helpers::getConfig('icon_dark')??'icon-dark.svg')}}" alt="" height="22">
                 </span>
                 <span class="logo-lg">
-                    <img src="{{asset('assets/images/logo-1.svg')}}" alt="" height="17">
+                    <img src="{{asset('assets/images/logo').'/'.(App\Helpers\Helpers::getConfig('logo_dark')??'logo-dark.svg')}}" alt="" height="17">
                 </span>
             </a>
 
             <a href="{{url('/')}}" class="logo logo-light">
                 <span class="logo-sm">
-                    <img src="{{asset('assets/images/logo-1.svg')}}" alt="" width="" height="16">
+                    <img src="{{asset('assets/images/logo/').'/'.(App\Helpers\Helpers::getConfig('icon_light')??'icon-light.svg')}}" alt="" height="32">
                 </span>
                 <span class="logo-lg">
-                    <img src="{{asset('assets/images/logo-1.svg')}}" alt="" height="16">
+                    <img src="{{asset('assets/images/logo/').'/'.(App\Helpers\Helpers::getConfig('logo_light')??'logo-light.svg')}}" alt="" height="44">
                 </span>
             </a>
         </div>
@@ -68,7 +68,7 @@
         <div class="dropdown d-inline-block">
             <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <img class="rounded-circle header-profile-user" src="{{asset('assets/images/users/avatar-1.jpg')}}"
+                <img class="rounded-circle header-profile-user" src="{{asset('assets/images/users/avatar.jpg')}}"
                     alt="Header Avatar">
                 <span class="d-none d-xl-inline-block ms-1" key="t-henry">{{auth()->user()->name ??''}}</span>
                 <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>

@@ -28,10 +28,10 @@
                                                 <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
                                                     <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
                                                         <a href="{{url('/')}}" style="display: block; margin: 0 auto; text-align: center;">
-                                                            <img src="{{url('/')}}/assets/images/logo-dark.png" alt="E-thrift" style="width: auto; height: 70px; object-fit: cover;">
+                                                            <img src="{{url('/')}}/assets/images/logo/{{App\Helpers\Helpers::getConfig('logo')??'logo-dark.svg'}}" alt="E-thrift" style="width: auto; height: 70px; object-fit: cover;">
                                                         </a>
-
-                                                        <img src="{{url('/')}}/assets/images/icon-sec.png" alt="sec" style="width: 32px; height: 32px; object-fit: cover;">
+                                                        <br><br>
+                                                        <img src="{{url('/')}}/assets/images/icon-sec.png" alt="sec" style="display: block; margin: 0 auto; width: 32px; height: 32px; object-fit: cover;">
                                                         <br>
                                                         <h3>Reset Password Request</h3>
                                                     </td>

@@ -79,7 +79,7 @@
                             <div class="row mb-4">
                                 <label for="horizontal-bank-select" class="col-sm-3 col-form-label">Bank</label>
                                 <div class="col-sm-9">
-                                    <select name="bank" id="horizontal-bank-select" class="form-control select2">
+                                    <select name="bank" id="horizontal-bank-select" class="form-control select2" onchange="getAccountName()">
                                         <option value="">Select</option>
                                         @foreach ($banks as $bank)
                                             <option value="{{ $bank->code }}"
@@ -189,6 +189,9 @@
     <!-- form advanced init -->
     {{-- <script src="{{ asset('assets/js/pages/form-advanced.init.js') }}"></script> --}}
     <script>
+
+    
+
         !(function(s) {
             "use strict";
 

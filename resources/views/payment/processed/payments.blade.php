@@ -40,27 +40,33 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <h4 class="card-title">{{ $pageTitle ?? '' }}</h4>
+                            
+                            <h4 class="card-title mb-3">{{ $pageTitle ?? '' }} <a href="{{route('payment.export_processed',['batch_id'=>$batch->id])}}" ><button type="submit" class="btn btn-success" >
+                                Export to Excel
+                            </button></a></h4>
+                            
+
                             <table id="datatable-buttons" class="table table-striped dt-responsive  wrap w-100">
                                 <thead>
+                                    
                                     <tr>
+                                        <th>Beneficiary</th>
                                         <th>Bank Code</th>
                                         <th>Account No</th>
-                                        <th>Beneficiary</th>
                                         <th>Amount</th>
                                         <th>Narration</th>
-                                        <th>Bank Name</th>
+                                        {{-- <th>Bank Name</th> --}}
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($payments as $payment)
                                     <tr>
+                                        <td>{{strtoupper($payment->beneficiary_name)}}</td>
                                         <td>{{$payment->bank}}</td>
                                         <td>{{$payment->beneficiary_account_no}}</td>
-                                        <td>{{strtoupper($payment->beneficiary_name)}}</td>
                                         <td>{{ $payment->amount }}</td>
                                         <td>{{strtoupper($payment->description)}}</td>
-                                        <td>{{strtoupper(\App\Helpers\Helpers::getBankName($payment->bank))}}</td>
+                                        {{-- <td>{{strtoupper(\App\Helpers\Helpers::getBankName($payment->bank))}}</td> --}}
                                     </tr>
                                     @endforeach
                                 </tbody>

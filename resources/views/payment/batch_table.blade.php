@@ -59,7 +59,7 @@
                             <button type="button" name="approve" class="btn btn-primary my-2 mr-2 w-md approve-batch {{isset($process) ? 'd-none' : ''}}"
                                 >Approve</button>
                             @if(isset($process))
-                            <button type="button" name="process" class="btn btn-primary my-2 mr-2 w-md process-payment "
+                            <button type="button" name="process" class="btn btn-primary my-2 mr-2 w-md process-batch "
                                 >Process</button>
                             <button type="button" name="reject_selected" class="btn btn-warning my-2 mr-2 w-md "
                                 onclick="rejectSelected()">Reject Seleted</button>
@@ -132,7 +132,7 @@
                                 <button  type="button" name="approve" class="btn btn-primary my-2 mr-2 w-md approve-batch {{isset($process) ? 'd-none' : ''}}"
                                     >Approve</button>
                                 @if(isset($process))
-                                <button type="button" name="process" class="btn btn-primary my-2 mr-2 w-md process-payment "
+                                <button type="button" name="process" class="btn btn-primary my-2 mr-2 w-md process-batch "
                                     >Process</button>
                                 <button type="button" name="reject_selected" class="btn btn-warning my-2 mr-2 w-md "
                                     onclick="rejectSelected()">Reject Seleted</button>

@@ -497,6 +497,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/reject/{id}', [PaymentController::class, 'rejectPayment'])->name('reject');
         //add system payment to batch
         Route::post('/add-system-payment', [PaymentController::class, 'addSystemPaymentsToBatch'])->name('add_system_payment');
+        //export processed batch payment
+        Route::get('/export/processed/{batch_id}', [PaymentController::class, 'exportProcessedPayment'])->name('export_processed');
 
     });
 

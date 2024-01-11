@@ -44,6 +44,7 @@
                             <h4 class="card-title mb-4">{{ $batch_name }}</h4>
 
                             <form action="{{route('payment.store')}}" method="post">
+                                @csrf
                                 <div class="row mb-4">
                                     <label for="horizontal-batch" class="col-sm-3 col-form-label">Batch Name</label>
                                     <div class="col-sm-9">
@@ -113,7 +114,7 @@
                                 <div class="row mb-4">
                                     <label for="horizontal-narration-input" class="col-sm-3 col-form-label">Narration</label>
                                     <div class="col-sm-9">
-                                        <input type="text" name="narration" class="form-control"
+                                        <input type="text" name="description" class="form-control"
                                             id="horizontal-narration-input" placeholder="UW-COOP-Loan-Sept, 2023">
                                     </div>
                                 </div>

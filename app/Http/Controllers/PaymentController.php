@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Helpers\Helpers;
+use App\Exports\ProcessedPaymentExport;
+use App\Exports\dataExport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Models\PaymentBatch;
 use App\Models\Payment;
 use App\Models\Loan;
@@ -132,6 +135,14 @@ class PaymentController extends Controller
 
         $payment_batch_id = $request->batch;
 
+        //check if account_no exist for the bank
+        $check_account_no = Payment::where('beneficiary_account_no',$request->account_no)->where('bank',$request->bank)->where('batch_id',$payment_batch_id)->first();
+
+        if($check_account_no){
+            toastr()->error('Payment With The Account Number Already Exist For The Selected Bank in this Batch');
+            return redirect()->back();
+        }
+
         //if no batch selected create new batch with name and category
         if($request->batch == ''){
             //create payment batch name with helper class
@@ -238,7 +249,7 @@ class PaymentController extends Controller
     {
 
         //get all loans that are not paid out
-        $loans = Loan::where('paid_out',0)->get();
+        $loans = Loan::where('paid_out',0)->where('repayment_status','active')->get();
 
         //return error message if no loans are found
         if(count($loans) == 0){
@@ -1137,6 +1148,8 @@ class PaymentController extends Controller
 
         //remove items that are not in the date range
         $array = [];
+
+        
         foreach($payments as $payment){
             $processed_at = strtotime($payment->processed_at);
             if($processed_at >= strtotime($date_from) && $processed_at <= strtotime($date_to)){
@@ -1190,6 +1203,35 @@ class PaymentController extends Controller
         $search = true;
 
         return view('payment.processed.batches', compact('batches','search','pageTitle'));
+
+    }
+
+    //export processed payment
+
+    public function exportProcessedPayment(Request $request, $batch_id){
+
+        $batch = PaymentBatch::find($batch_id);
+
+        $payments = Payment::where('payment_batch_id',$batch_id)->where('is_processed',1)->get();
+
+        $data = [];
+
+        foreach($payments as $payment){
+            $data[] = [
+                'Beneficiary Name' => $payment->beneficiary_name,
+                'Bank' => $payment->bank,
+                'Beneficiary Account No' => $payment->beneficiary_account_no,
+                'Amount' => $payment->amount,
+                'Description' => $payment->description,
+            ];
+        }
+
+        //add array keys as the first row
+        array_unshift($data, array_keys($data[0]));
+
+        $file_name = 'Processed'.$batch->name.'_'.date('d_m_Y_H_i_s').'.xlsx';
+
+        return Excel::download(new dataExport($data), $file_name);
 
     }
 
